@@ -5,17 +5,22 @@ import { StatsBar } from './StatsBar';
 import { FeedbackMessage } from './FeedbackMessage';
 import { HistoryPanel } from './HistoryPanel';
 import { ResultsModal } from './ResultsModal';
+import { StreakDisplay } from './StreakDisplay';
 import { useGameState } from '@/hooks/useGameState';
 import { useGameSounds } from '@/hooks/useSound';
-import { GameSettings, OperationType } from '@/types/game';
+import { GameSettings, OperationType, Question } from '@/types/game';
 import { Button } from '@/components/ui/button';
-import { Play, Square, Keyboard, History } from 'lucide-react';
+import { Play, Square, Keyboard } from 'lucide-react';
+
+const ANIMATION_DURATION = 500; // ms for color animation
+
 interface GameAreaProps {
   settings: GameSettings;
   onUpdateStats: (correct: number, total: number, bestStreak: number, opm: number) => void;
   allTimeBestStreak: number;
   allTimeBestOpm: number;
 }
+
 export function GameArea({
   settings,
   onUpdateStats,
@@ -44,19 +49,34 @@ export function GameArea({
   const [showFeedback, setShowFeedback] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [streakAnimate, setStreakAnimate] = useState(false);
+  const [displayedQuestion, setDisplayedQuestion] = useState<Question | null>(null);
+  const [displayedStreak, setDisplayedStreak] = useState(0);
+  
   const hasEnabledOperation = (Object.keys(settings.operations) as OperationType[]).some(op => settings.operations[op].enabled);
+
+  // Initialize displayed question when game starts
+  useEffect(() => {
+    if (state.isPlaying && state.currentQuestion && !displayedQuestion) {
+      setDisplayedQuestion(state.currentQuestion);
+      setDisplayedStreak(state.streak);
+    }
+  }, [state.isPlaying, state.currentQuestion, displayedQuestion, state.streak]);
+
   const handleSubmit = useCallback((answer: number) => {
     const result = submitAnswer(answer);
     if (!result) return;
+    
     setLastResult({
       isCorrect: result.isCorrect,
       answer: result.question.answer
     });
     setFeedbackState(result.isCorrect ? 'correct' : 'wrong');
     setShowFeedback(true);
+    
+    const newStreak = result.isCorrect ? state.streak + 1 : 0;
+    
     if (result.isCorrect) {
       playCorrect();
-      const newStreak = state.streak + 1;
       if (newStreak % 5 === 0 && newStreak > 0) {
         playStreak(newStreak);
       }
@@ -66,12 +86,14 @@ export function GameArea({
       playWrong();
     }
 
-    // Reset feedback after animation
+    // Update displayed question and streak after animation completes
     setTimeout(() => {
+      setDisplayedQuestion(state.currentQuestion);
+      setDisplayedStreak(newStreak);
       setFeedbackState('idle');
       setShowFeedback(false);
-    }, 800);
-  }, [submitAnswer, playCorrect, playWrong, playStreak, state.streak]);
+    }, ANIMATION_DURATION);
+  }, [submitAnswer, playCorrect, playWrong, playStreak, state.streak, state.currentQuestion]);
   const handleEndGame = useCallback(() => {
     const stats = calculateStats();
     onUpdateStats(stats.correctAnswers, stats.totalQuestions, stats.bestStreak, stats.opm);
@@ -120,24 +142,27 @@ export function GameArea({
       </div>;
   }
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-8">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
       {/* Stats Bar */}
       <StatsBar 
-        score={state.score} 
-        streak={state.streak} 
         totalQuestions={state.results.length} 
-        averageTimeMs={stats.averageTimeMs} 
-        opm={stats.opm} 
-        streakAnimate={streakAnimate} 
+        opm={stats.opm}
+        correctAnswers={state.score}
       />
 
       {/* Question Display */}
-      <div className="flex flex-col items-center gap-8 py-12">
-        {state.currentQuestion && (
-          <QuestionDisplay question={state.currentQuestion} feedbackState={feedbackState} />
+      <div className="flex flex-col items-center gap-8 py-8">
+        {displayedQuestion && (
+          <QuestionDisplay question={displayedQuestion} feedbackState={feedbackState} />
         )}
 
         <AnswerInput onSubmit={handleSubmit} feedbackState={feedbackState} onKeyPress={playKeypress} />
+        
+        {/* Streak Display - centered below answer */}
+        <div className="flex flex-col items-center mt-4">
+          <span className="text-xs uppercase tracking-wider text-ghost mb-1">streak</span>
+          <StreakDisplay streak={displayedStreak} animate={streakAnimate} />
+        </div>
       </div>
 
       {/* Feedback Message */}
@@ -152,10 +177,6 @@ export function GameArea({
       {/* History Panel */}
       {state.results.length > 0 && (
         <div className="w-full max-w-md">
-          <div className="flex items-center gap-2 text-ghost text-sm mb-3">
-            <History className="w-4 h-4" />
-            <span>Histórico</span>
-          </div>
           <HistoryPanel results={state.results} />
         </div>
       )}
