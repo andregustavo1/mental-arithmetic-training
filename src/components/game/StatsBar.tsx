@@ -1,38 +1,18 @@
-import { StreakDisplay } from './StreakDisplay';
-
 interface StatsBarProps {
-  score: number;
-  streak: number;
   totalQuestions: number;
-  averageTimeMs: number;
   opm: number;
-  streakAnimate?: boolean;
+  correctAnswers: number;
 }
 
 export function StatsBar({ 
-  score, 
-  streak, 
   totalQuestions, 
-  averageTimeMs, 
   opm,
-  streakAnimate 
+  correctAnswers
 }: StatsBarProps) {
-  const accuracy = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+  const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
   
   return (
     <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 text-dim">
-      {/* Score */}
-      <div className="flex flex-col items-center">
-        <span className="text-xs uppercase tracking-wider text-ghost">score</span>
-        <span className="text-xl font-bold text-highlight">{score}</span>
-      </div>
-
-      {/* Streak */}
-      <div className="flex flex-col items-center">
-        <span className="text-xs uppercase tracking-wider text-ghost mb-1">streak</span>
-        <StreakDisplay streak={streak} animate={streakAnimate} />
-      </div>
-
       {/* Accuracy */}
       <div className="flex flex-col items-center">
         <span className="text-xs uppercase tracking-wider text-ghost">precisão</span>
@@ -43,14 +23,6 @@ export function StatsBar({
       <div className="flex flex-col items-center">
         <span className="text-xs uppercase tracking-wider text-ghost">opm</span>
         <span className="text-xl font-bold text-highlight">{Math.round(opm)}</span>
-      </div>
-
-      {/* Average Time */}
-      <div className="flex flex-col items-center">
-        <span className="text-xs uppercase tracking-wider text-ghost">tempo médio</span>
-        <span className="text-xl font-bold text-highlight">
-          {averageTimeMs > 0 ? (averageTimeMs / 1000).toFixed(1) : '0.0'}s
-        </span>
       </div>
     </div>
   );

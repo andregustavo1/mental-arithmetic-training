@@ -18,13 +18,14 @@ export function AnswerInput({ onSubmit, disabled, feedbackState, onKeyPress }: A
     }
   }, [disabled]);
 
-  // Clear input and refocus after feedback
+  // Clear input immediately when feedback starts
   useEffect(() => {
     if (feedbackState !== 'idle') {
+      setValue('');
+      // Refocus after animation completes
       const timer = setTimeout(() => {
-        setValue('');
         inputRef.current?.focus();
-      }, 200);
+      }, 500);
       return () => clearTimeout(timer);
     }
   }, [feedbackState]);
@@ -68,7 +69,7 @@ export function AnswerInput({ onSubmit, disabled, feedbackState, onKeyPress }: A
         autoCorrect="off"
         spellCheck={false}
       />
-      <p className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-sm text-ghost">
+      <p className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-sm text-ghost hidden md:block">
         pressione enter
       </p>
     </div>
