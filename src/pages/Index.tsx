@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { GameArea } from '@/components/game/GameArea';
-import { SettingsPanel } from '@/components/settings/SettingsPanel';
+import { SettingsModal } from '@/components/settings/SettingsModal';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { OperationType } from '@/types/game';
-import { cn } from '@/lib/utils';
 
 const Index = () => {
   const { 
@@ -29,38 +28,30 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header
-        onSettingsClick={() => setShowSettings(!showSettings)}
+        onSettingsClick={() => setShowSettings(true)}
         showSettings={showSettings}
         allTimeBestStreak={data.allTimeBestStreak}
         allTimeBestOpm={data.allTimeBestOpm}
       />
 
       <main className="flex-1 container mx-auto px-4 py-8">
-        <div className={cn(
-          "grid gap-8 transition-all duration-300",
-          showSettings ? "lg:grid-cols-[1fr,400px]" : "grid-cols-1"
-        )}>
-          {/* Game Area */}
-          <GameArea
-            settings={data.settings}
-            onUpdateStats={updateStats}
-            allTimeBestStreak={data.allTimeBestStreak}
-            allTimeBestOpm={data.allTimeBestOpm}
-          />
-
-          {/* Settings Panel */}
-          {showSettings && (
-            <aside className="bg-card/50 backdrop-blur-sm border border-border rounded-lg p-6 h-fit">
-              <SettingsPanel
-                settings={data.settings}
-                onToggleOperation={(op: OperationType) => toggleOperation(op)}
-                onRangeChange={(op: OperationType, field, value) => updateOperationRange(op, field, value)}
-                onToggleSound={toggleSound}
-              />
-            </aside>
-          )}
-        </div>
+        <GameArea
+          settings={data.settings}
+          onUpdateStats={updateStats}
+          allTimeBestStreak={data.allTimeBestStreak}
+          allTimeBestOpm={data.allTimeBestOpm}
+        />
       </main>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        open={showSettings}
+        onClose={() => setShowSettings(false)}
+        settings={data.settings}
+        onToggleOperation={(op: OperationType) => toggleOperation(op)}
+        onRangeChange={(op: OperationType, field, value) => updateOperationRange(op, field, value)}
+        onToggleSound={toggleSound}
+      />
 
       {/* Footer */}
       <footer className="border-t border-border py-4">
