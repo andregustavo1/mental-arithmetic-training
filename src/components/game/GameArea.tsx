@@ -3,12 +3,13 @@ import { QuestionDisplay } from './QuestionDisplay';
 import { AnswerInput } from './AnswerInput';
 import { StatsBar } from './StatsBar';
 import { FeedbackMessage } from './FeedbackMessage';
+import { HistoryPanel } from './HistoryPanel';
 import { ResultsModal } from './ResultsModal';
 import { useGameState } from '@/hooks/useGameState';
 import { useGameSounds } from '@/hooks/useSound';
 import { GameSettings, OperationType } from '@/types/game';
 import { Button } from '@/components/ui/button';
-import { Play, Square, Keyboard } from 'lucide-react';
+import { Play, Square, Keyboard, History } from 'lucide-react';
 interface GameAreaProps {
   settings: GameSettings;
   onUpdateStats: (correct: number, total: number, bestStreak: number, opm: number) => void;
@@ -118,26 +119,52 @@ export function GameArea({
         <ResultsModal open={showResults} onClose={handleCloseResults} onRestart={handleRestart} stats={stats} results={state.results} allTimeBestStreak={allTimeBestStreak} allTimeBestOpm={allTimeBestOpm} />
       </div>;
   }
-  return <div className="flex flex-col items-center justify-center min-h-[60vh] gap-8">
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-8">
       {/* Stats Bar */}
-      <StatsBar score={state.score} streak={state.streak} totalQuestions={state.results.length} averageTimeMs={stats.averageTimeMs} opm={stats.opm} streakAnimate={streakAnimate} />
+      <StatsBar 
+        score={state.score} 
+        streak={state.streak} 
+        totalQuestions={state.results.length} 
+        averageTimeMs={stats.averageTimeMs} 
+        opm={stats.opm} 
+        streakAnimate={streakAnimate} 
+      />
 
       {/* Question Display */}
       <div className="flex flex-col items-center gap-8 py-12">
-        {state.currentQuestion && <QuestionDisplay question={state.currentQuestion} feedbackState={feedbackState} />}
+        {state.currentQuestion && (
+          <QuestionDisplay question={state.currentQuestion} feedbackState={feedbackState} />
+        )}
 
         <AnswerInput onSubmit={handleSubmit} feedbackState={feedbackState} onKeyPress={playKeypress} />
       </div>
 
       {/* Feedback Message */}
       <div className="h-16 flex items-center justify-center">
-        <FeedbackMessage isCorrect={lastResult?.isCorrect ?? true} correctAnswer={lastResult?.answer} show={showFeedback} />
+        <FeedbackMessage 
+          isCorrect={lastResult?.isCorrect ?? true} 
+          correctAnswer={lastResult?.answer} 
+          show={showFeedback} 
+        />
       </div>
+
+      {/* History Panel */}
+      {state.results.length > 0 && (
+        <div className="w-full max-w-md">
+          <div className="flex items-center gap-2 text-ghost text-sm mb-3">
+            <History className="w-4 h-4" />
+            <span>Histórico</span>
+          </div>
+          <HistoryPanel results={state.results} />
+        </div>
+      )}
 
       {/* End Game Button */}
       <Button onClick={handleEndGame} variant="ghost" className="text-muted-foreground hover:text-highlight">
         <Square className="w-4 h-4 mr-2" />
         Encerrar (Esc)
       </Button>
-    </div>;
+    </div>
+  );
 }

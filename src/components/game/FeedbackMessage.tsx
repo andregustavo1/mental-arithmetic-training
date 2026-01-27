@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Check, X } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 interface FeedbackMessageProps {
   isCorrect: boolean;
@@ -7,26 +7,8 @@ interface FeedbackMessageProps {
   show: boolean;
 }
 
-const correctMessages = [
-  "Correto!",
-  "Muito bem!",
-  "Excelente!",
-  "Perfeito!",
-  "Isso aí!",
-];
-
-const wrongMessages = [
-  "Incorreto",
-  "Tente novamente",
-  "Quase lá",
-];
-
 export function FeedbackMessage({ isCorrect, correctAnswer, show }: FeedbackMessageProps) {
   if (!show) return null;
-
-  const message = isCorrect 
-    ? correctMessages[Math.floor(Math.random() * correctMessages.length)]
-    : wrongMessages[Math.floor(Math.random() * wrongMessages.length)];
 
   return (
     <div 
@@ -39,14 +21,13 @@ export function FeedbackMessage({ isCorrect, correctAnswer, show }: FeedbackMess
       )}
     >
       {isCorrect ? (
-        <Check className="w-6 h-6" />
+        <>
+          <Check className="w-6 h-6" />
+          <span>Correto</span>
+        </>
       ) : (
-        <X className="w-6 h-6" />
-      )}
-      <span>{message}</span>
-      {!isCorrect && correctAnswer !== undefined && (
-        <span className="ml-2 text-muted-foreground">
-          Resposta: <span className="text-highlight">{correctAnswer}</span>
+        <span className="text-highlight">
+          Resposta: <span className="text-highlight font-bold">{correctAnswer}</span>
         </span>
       )}
     </div>
