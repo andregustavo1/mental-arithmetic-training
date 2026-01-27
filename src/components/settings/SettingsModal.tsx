@@ -1,9 +1,9 @@
 import { OperationType, GameSettings } from '@/types/game';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { NumberPicker } from '@/components/ui/number-picker';
 import { Volume2, VolumeX, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
 interface SettingsModalProps {
   open: boolean;
   onClose: () => void;
@@ -106,21 +106,19 @@ export function SettingsModal({
                             <Label className="text-xs text-ghost uppercase tracking-wider block mb-2">
                               X1 (intervalo)
                             </Label>
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="number"
+                            <div className="flex items-center justify-between">
+                              <NumberPicker
                                 value={config.x1Min}
-                                onChange={(e) => onRangeChange(operation, 'x1Min', parseInt(e.target.value) || 0)}
-                                className="flex-1 min-w-0 px-3 py-2 bg-input border border-border rounded-md text-highlight text-center text-sm"
+                                onChange={(value) => onRangeChange(operation, 'x1Min', value)}
                                 min={0}
+                                max={9999}
                               />
                               <span className="text-ghost text-sm">a</span>
-                              <input
-                                type="number"
+                              <NumberPicker
                                 value={config.x1Max}
-                                onChange={(e) => onRangeChange(operation, 'x1Max', parseInt(e.target.value) || 0)}
-                                className="flex-1 min-w-0 px-3 py-2 bg-input border border-border rounded-md text-highlight text-center text-sm"
+                                onChange={(value) => onRangeChange(operation, 'x1Max', value)}
                                 min={0}
+                                max={9999}
                               />
                             </div>
                           </div>
@@ -130,21 +128,19 @@ export function SettingsModal({
                             <Label className="text-xs text-ghost uppercase tracking-wider block mb-2">
                               X2 (intervalo)
                             </Label>
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="number"
+                            <div className="flex items-center justify-between">
+                              <NumberPicker
                                 value={config.x2Min}
-                                onChange={(e) => onRangeChange(operation, 'x2Min', parseInt(e.target.value) || 0)}
-                                className="flex-1 min-w-0 px-3 py-2 bg-input border border-border rounded-md text-highlight text-center text-sm"
+                                onChange={(value) => onRangeChange(operation, 'x2Min', value)}
                                 min={0}
+                                max={9999}
                               />
                               <span className="text-ghost text-sm">a</span>
-                              <input
-                                type="number"
+                              <NumberPicker
                                 value={config.x2Max}
-                                onChange={(e) => onRangeChange(operation, 'x2Max', parseInt(e.target.value) || 0)}
-                                className="flex-1 min-w-0 px-3 py-2 bg-input border border-border rounded-md text-highlight text-center text-sm"
+                                onChange={(value) => onRangeChange(operation, 'x2Max', value)}
                                 min={0}
+                                max={9999}
                               />
                             </div>
                           </div>
