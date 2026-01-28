@@ -2,13 +2,12 @@ import { useState, useCallback, useEffect } from 'react';
 import { QuestionDisplay } from './QuestionDisplay';
 import { AnswerInput } from './AnswerInput';
 import { StatsBar } from './StatsBar';
-import { FeedbackMessage } from './FeedbackMessage';
 import { HistoryPanel } from './HistoryPanel';
 import { ResultsModal } from './ResultsModal';
 import { StreakDisplay } from './StreakDisplay';
 import { useGameState } from '@/hooks/useGameState';
 import { useGameSounds } from '@/hooks/useSound';
-import { GameSettings, OperationType, Question } from '@/types/game';
+import { GameSettings, OperationType, Question, GameStats } from '@/types/game';
 import { Button } from '@/components/ui/button';
 import { Play, Square, Keyboard } from 'lucide-react';
 
@@ -16,7 +15,7 @@ const ANIMATION_DURATION = 500; // ms for color animation
 
 interface GameAreaProps {
   settings: GameSettings;
-  onUpdateStats: (correct: number, total: number, bestStreak: number, opm: number) => void;
+  onUpdateStats: (correct: number, total: number, bestStreak: number, opm: number, stats: GameStats) => void;
   allTimeBestStreak: number;
   allTimeBestOpm: number;
 }
@@ -63,8 +62,10 @@ export function GameArea({
   }, [state.isPlaying, state.currentQuestion, displayedQuestion, state.streak]);
 
   const handleSubmit = useCallback((answer: number) => {
-    const result = submitAnswer(answer);
-    if (!result) return;
+    const submitResult = submitAnswer(answer);
+    if (!submitResult) return;
+    
+    const { result, nextQuestion } = submitResult;
     
     setLastResult({
       isCorrect: result.isCorrect,
@@ -87,16 +88,17 @@ export function GameArea({
     }
 
     // Update displayed question and streak after animation completes
+    // nextQuestion comes directly from submitAnswer, avoiding stale closure issues
     setTimeout(() => {
-      setDisplayedQuestion(state.currentQuestion);
+      setDisplayedQuestion(nextQuestion);
       setDisplayedStreak(newStreak);
       setFeedbackState('idle');
       setShowFeedback(false);
     }, ANIMATION_DURATION);
-  }, [submitAnswer, playCorrect, playWrong, playStreak, state.streak, state.currentQuestion]);
+  }, [submitAnswer, playCorrect, playWrong, playStreak, state.streak]);
   const handleEndGame = useCallback(() => {
     const stats = calculateStats();
-    onUpdateStats(stats.correctAnswers, stats.totalQuestions, stats.bestStreak, stats.opm);
+    onUpdateStats(stats.correctAnswers, stats.totalQuestions, stats.bestStreak, stats.opm, stats);
     endGame();
     setShowResults(true);
   }, [calculateStats, onUpdateStats, endGame]);
@@ -163,15 +165,6 @@ export function GameArea({
           <span className="text-xs uppercase tracking-wider text-ghost mb-1">streak</span>
           <StreakDisplay streak={displayedStreak} animate={streakAnimate} />
         </div>
-      </div>
-
-      {/* Feedback Message */}
-      <div className="h-16 flex items-center justify-center">
-        <FeedbackMessage 
-          isCorrect={lastResult?.isCorrect ?? true} 
-          correctAnswer={lastResult?.answer} 
-          show={showFeedback} 
-        />
       </div>
 
       {/* History Panel */}

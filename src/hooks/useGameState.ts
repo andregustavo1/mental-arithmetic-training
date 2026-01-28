@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { GameState, GameSettings, Question, QuestionResult, OperationType, GameStats } from '@/types/game';
+import { GameState, GameSettings, Question, QuestionResult, OperationType, GameStats, SubmitAnswerResult } from '@/types/game';
 
 const OPERATION_SYMBOLS: Record<OperationType, string> = {
   addition: '+',
@@ -99,7 +99,7 @@ export function useGameState(settings: GameSettings) {
     });
   }, [settings]);
 
-  const submitAnswer = useCallback((userAnswer: number): QuestionResult | null => {
+  const submitAnswer = useCallback((userAnswer: number): SubmitAnswerResult | null => {
     if (!state.currentQuestion || questionStartRef.current === null) return null;
     
     const now = Date.now();
@@ -131,7 +131,7 @@ export function useGameState(settings: GameSettings) {
       questionStartTime: Date.now(),
     }));
     
-    return result;
+    return { result, nextQuestion };
   }, [state, settings]);
 
   const endGame = useCallback(() => {
@@ -145,6 +145,20 @@ export function useGameState(settings: GameSettings) {
     questionStartRef.current = null;
     setState(initialState);
   }, []);
+
+  const regenerateQuestion = useCallback(() => {
+    const question = generateQuestion(settings);
+    if (!question) return;
+    
+    questionStartRef.current = Date.now();
+    setState(prev => ({
+      ...prev,
+      currentQuestion: question,
+      questionStartTime: Date.now(),
+    }));
+    
+    return question;
+  }, [settings]);
 
   const calculateStats = useCallback((): GameStats => {
     const { results, sessionStartTime, bestStreak } = state;
@@ -182,6 +196,7 @@ export function useGameState(settings: GameSettings) {
     submitAnswer,
     endGame,
     resetGame,
+    regenerateQuestion,
     calculateStats,
   };
 }

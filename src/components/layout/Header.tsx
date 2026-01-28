@@ -2,15 +2,15 @@ import { Settings, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 interface HeaderProps {
   onSettingsClick: () => void;
+  onHistoryClick: () => void;
   showSettings: boolean;
-  allTimeBestStreak: number;
-  allTimeBestOpm: number;
+  showHistory: boolean;
 }
 export function Header({
   onSettingsClick,
+  onHistoryClick,
   showSettings,
-  allTimeBestStreak,
-  allTimeBestOpm
+  showHistory
 }: HeaderProps) {
   return <header className="border-b border-border bg-card/50 backdrop-blur-sm">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -21,19 +21,10 @@ export function Header({
           </h1>
         </div>
 
-        <div className="flex items-center gap-6">
-          {/* All-time stats */}
-          <div className="hidden md:flex items-center gap-6 text-sm">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-ghost" />
-              <span className="text-ghost">melhor streak:</span>
-              <span className="text-highlight font-bold">{allTimeBestStreak}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-ghost">melhor opm:</span>
-              <span className="text-highlight font-bold">{Math.round(allTimeBestOpm)}</span>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={onHistoryClick} className={showHistory ? 'text-primary' : 'text-muted-foreground hover:text-highlight'}>
+            <BarChart3 className="w-5 h-5" />
+          </Button>
 
           <Button variant="ghost" size="icon" onClick={onSettingsClick} className={showSettings ? 'text-primary' : 'text-muted-foreground hover:text-highlight'}>
             <Settings className="w-5 h-5" />

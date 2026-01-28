@@ -2,11 +2,14 @@ import { OperationType, GameSettings } from '@/types/game';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { NumberPicker } from '@/components/ui/number-picker';
-import { Volume2, VolumeX, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Volume2, VolumeX, X, Save } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 interface SettingsModalProps {
   open: boolean;
   onClose: () => void;
+  onSave: () => void;
   settings: GameSettings;
   onToggleOperation: (operation: OperationType) => void;
   onRangeChange: (operation: OperationType, field: 'x1Min' | 'x1Max' | 'x2Min' | 'x2Max', value: number) => void;
@@ -24,13 +27,17 @@ const operations: OperationType[] = ['addition', 'subtraction', 'multiplication'
 
 export function SettingsModal({ 
   open, 
-  onClose, 
+  onClose,
+  onSave, 
   settings, 
   onToggleOperation, 
   onRangeChange,
   onToggleSound 
 }: SettingsModalProps) {
   const hasEnabledOperation = operations.some(op => settings.operations[op].enabled);
+
+  // Bloquear scroll do body quando modal está aberto
+  useBodyScrollLock(open);
 
   if (!open) return null;
 
@@ -46,17 +53,18 @@ export function SettingsModal({
       />
       
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
         <div 
           className={cn(
-            "relative w-full max-w-2xl max-h-[85vh] overflow-y-auto",
+            "relative w-full max-w-2xl max-h-[85vh] flex flex-col",
             "bg-card border border-border rounded-xl shadow-2xl",
-            "animate-in zoom-in-95 fade-in-0 duration-300"
+            "animate-in zoom-in-95 fade-in-0 duration-300",
+            "overscroll-contain"
           )}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
-          <div className="sticky top-0 bg-card/95 backdrop-blur-sm border-b border-border px-6 py-4 flex items-center justify-between">
+          {/* Header - Fixed */}
+          <div className="flex-shrink-0 bg-card border-b border-border px-6 py-4 flex items-center justify-between rounded-t-xl">
             <h2 className="text-2xl font-bold text-highlight">Configurações</h2>
             <button 
               onClick={onClose}
@@ -66,8 +74,8 @@ export function SettingsModal({
             </button>
           </div>
 
-          {/* Content */}
-          <div className="p-6 space-y-6">
+          {/* Content - Scrollable */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {/* Operations */}
             <div>
               <h3 className="text-lg font-semibold text-highlight mb-4">Operações</h3>
@@ -172,7 +180,7 @@ export function SettingsModal({
                       Som
                     </Label>
                     <p className="text-sm text-ghost">
-                      Feedback sonoro para acertos e erros
+                      Feedback sonoro.
                     </p>
                   </div>
                 </div>
@@ -182,6 +190,19 @@ export function SettingsModal({
                 />
               </div>
             </div>
+          </div>
+
+          {/* Footer - Fixed */}
+          <div className="flex-shrink-0 bg-card border-t border-border px-6 py-4 rounded-b-xl">
+            <Button
+              onClick={onSave}
+              disabled={!hasEnabledOperation}
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              size="lg"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              Salvar
+            </Button>
           </div>
         </div>
       </div>

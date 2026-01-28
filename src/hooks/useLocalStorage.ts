@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { SavedData, GameSettings, OperationType } from '@/types/game';
+import { SavedData, GameSettings, OperationType, GameStats, SessionHistory } from '@/types/game';
 
 const STORAGE_KEY = 'mathtype-data';
 
@@ -19,6 +19,7 @@ const defaultData: SavedData = {
   allTimeBestOpm: 0,
   totalQuestionsAnswered: 0,
   totalCorrectAnswers: 0,
+  sessionHistory: [],
 };
 
 export function useLocalStorage() {
@@ -54,14 +55,25 @@ export function useLocalStorage() {
     saveData({ settings });
   }, [saveData]);
 
-  const updateStats = useCallback((correct: number, total: number, bestStreak: number, opm: number) => {
+  const updateStats = useCallback((correct: number, total: number, bestStreak: number, opm: number, stats: GameStats) => {
     setData(prev => {
+      // Criar nova entrada no histórico
+      const newSession: SessionHistory = {
+        id: Date.now().toString(),
+        date: Date.now(),
+        stats: stats,
+      };
+      
+      // Manter apenas as últimas 50 sessões
+      const updatedHistory = [newSession, ...prev.sessionHistory].slice(0, 50);
+      
       const updated = {
         ...prev,
         totalQuestionsAnswered: prev.totalQuestionsAnswered + total,
         totalCorrectAnswers: prev.totalCorrectAnswers + correct,
         allTimeBestStreak: Math.max(prev.allTimeBestStreak, bestStreak),
         allTimeBestOpm: Math.max(prev.allTimeBestOpm, opm),
+        sessionHistory: updatedHistory,
       };
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));

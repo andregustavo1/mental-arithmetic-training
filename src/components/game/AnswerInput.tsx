@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { cn } from '@/lib/utils';
+import { CornerDownLeft } from 'lucide-react';
 
 interface AnswerInputProps {
   onSubmit: (answer: number) => void;
@@ -22,10 +23,15 @@ export function AnswerInput({ onSubmit, disabled, feedbackState, onKeyPress }: A
   useEffect(() => {
     if (feedbackState !== 'idle') {
       setValue('');
-      // Refocus after animation completes
+    }
+  }, [feedbackState]);
+
+  // Refocus input when feedback ends (animation complete)
+  useEffect(() => {
+    if (feedbackState === 'idle') {
       const timer = setTimeout(() => {
         inputRef.current?.focus();
-      }, 500);
+      }, 100);
       return () => clearTimeout(timer);
     }
   }, [feedbackState]);
@@ -45,8 +51,22 @@ export function AnswerInput({ onSubmit, disabled, feedbackState, onKeyPress }: A
     }
   };
 
+  const handleSubmit = () => {
+    if (value.trim()) {
+      const numValue = parseInt(value, 10);
+      if (!isNaN(numValue)) {
+        onSubmit(numValue);
+      }
+    }
+  };
+
+  // Prevenir que o botão roube o foco do input no mobile
+  const handleButtonMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+  };
+
   return (
-    <div className="relative">
+    <div className="relative flex flex-col items-center gap-4">
       <input
         ref={inputRef}
         type="text"
@@ -69,7 +89,27 @@ export function AnswerInput({ onSubmit, disabled, feedbackState, onKeyPress }: A
         autoCorrect="off"
         spellCheck={false}
       />
-      <p className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-sm text-ghost hidden md:block">
+      
+      {/* Mobile submit button - same width as input, below it */}
+      <button
+        onMouseDown={handleButtonMouseDown}
+        onTouchStart={handleButtonMouseDown}
+        onClick={handleSubmit}
+        disabled={disabled || !value.trim()}
+        className={cn(
+          "md:hidden w-48 py-3 rounded-lg transition-all duration-200",
+          "flex items-center justify-center gap-2",
+          "bg-primary text-primary-foreground font-medium",
+          "hover:bg-primary/90 active:scale-95",
+          "disabled:opacity-50 disabled:cursor-not-allowed"
+        )}
+        aria-label="Enviar resposta"
+      >
+        <CornerDownLeft className="w-5 h-5" />
+        <span>Enter</span>
+      </button>
+      
+      <p className="text-sm text-ghost hidden md:block">
         pressione enter
       </p>
     </div>

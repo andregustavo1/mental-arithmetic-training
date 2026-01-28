@@ -29,6 +29,11 @@ export interface QuestionResult {
   timestamp: number;
 }
 
+export interface SubmitAnswerResult {
+  result: QuestionResult;
+  nextQuestion: Question | null;
+}
+
 export interface GameState {
   isPlaying: boolean;
   currentQuestion: Question | null;
@@ -50,10 +55,17 @@ export interface GameStats {
   sessionDurationMs: number;
 }
 
+export interface SessionHistory {
+  id: string;
+  date: number; // timestamp
+  stats: GameStats;
+}
+
 export interface SavedData {
   settings: GameSettings;
   allTimeBestStreak: number;
   allTimeBestOpm: number;
   totalQuestionsAnswered: number;
   totalCorrectAnswers: number;
+  sessionHistory: SessionHistory[];
 }

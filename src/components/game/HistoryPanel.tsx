@@ -16,7 +16,7 @@ const OPERATION_SYMBOLS: Record<string, string> = {
 };
 
 export function HistoryPanel({ results }: HistoryPanelProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   if (results.length === 0) {
     return null;
