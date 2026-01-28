@@ -45,6 +45,7 @@
     --fire-yellow: 45 95% 55%;
     --fire-orange: 25 95% 55%;
     --fire-red: 0 85% 50%;
+    --fire-blue: 210 95% 55%;
     --fire-purple: 280 85% 55%;
     
     /* Text hierarchy */
@@ -131,6 +132,11 @@
   .fire-red {
     @apply text-[hsl(var(--fire-red))];
     text-shadow: 0 0 30px hsl(var(--fire-red) / 0.7);
+  }
+  
+  .fire-blue {
+    @apply text-[hsl(var(--fire-blue))];
+    text-shadow: 0 0 32px hsl(var(--fire-blue) / 0.75);
   }
   
   .fire-purple {
@@ -244,6 +250,11 @@
             drop-shadow(0 0 24px hsl(var(--fire-red) / 0.5));
   }
   
+  .flame-aura-blue {
+    filter: drop-shadow(0 0 13px hsl(var(--fire-blue) / 0.85))
+            drop-shadow(0 0 26px hsl(var(--fire-blue) / 0.55));
+  }
+  
   .flame-aura-purple {
     filter: drop-shadow(0 0 14px hsl(var(--fire-purple) / 0.9))
             drop-shadow(0 0 28px hsl(var(--fire-purple) / 0.6));
@@ -283,6 +294,13 @@
     width: 5px;
     height: 5px;
     animation: particle-float-fast 1.2s ease-out infinite;
+  }
+
+  /* Blue level - large, fast */
+  .particles-blue .particle {
+    width: 5.5px;
+    height: 5.5px;
+    animation: particle-float-intense 1s ease-out infinite;
   }
 
   /* Purple level - largest, fastest, most intense */
