@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { GameStats, QuestionResult } from '@/types/game';
 import { ConsistencyChart } from './ConsistencyChart';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Trophy, Target, Zap, Clock, Flame, RotateCcw, TrendingUp, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
@@ -76,7 +77,8 @@ export function ResultsModal({
               </button>
             </div>
 
-            {/* Content */}
+            {/* Content - Scrollable */}
+            <ScrollArea className="max-h-[60vh]">
             <div className="p-4 md:p-6 space-y-4 md:space-y-6">
               {/* Main Stats Grid */}
               <div className="grid grid-cols-2 gap-2 md:gap-3">
@@ -144,6 +146,7 @@ export function ResultsModal({
                 </div>
               </div>
             </div>
+            </ScrollArea>
 
             {/* Footer */}
             <div className="sticky bottom-0 bg-card border-t border-border px-4 md:px-6 py-3 md:py-4 rounded-b-xl">

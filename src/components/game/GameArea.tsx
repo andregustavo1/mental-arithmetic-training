@@ -53,13 +53,14 @@ export function GameArea({
   
   const hasEnabledOperation = (Object.keys(settings.operations) as OperationType[]).some(op => settings.operations[op].enabled);
 
-  // Initialize displayed question when game starts
+  // Sincronizar displayedQuestion com state.currentQuestion quando o jogo inicia
+  // Usar state.sessionStartTime como dependência para detectar novo jogo
   useEffect(() => {
-    if (state.isPlaying && state.currentQuestion && !displayedQuestion) {
+    if (state.isPlaying && state.currentQuestion) {
       setDisplayedQuestion(state.currentQuestion);
       setDisplayedStreak(state.streak);
     }
-  }, [state.isPlaying, state.currentQuestion, displayedQuestion, state.streak]);
+  }, [state.sessionStartTime]); // Executa quando um novo jogo começa
 
   const handleSubmit = useCallback((answer: number) => {
     const submitResult = submitAnswer(answer);
@@ -104,11 +105,15 @@ export function GameArea({
   }, [calculateStats, onUpdateStats, endGame]);
   const handleRestart = useCallback(() => {
     setShowResults(false);
+    setDisplayedQuestion(null);
+    setDisplayedStreak(0);
     resetGame();
     startGame();
   }, [resetGame, startGame]);
   const handleCloseResults = useCallback(() => {
     setShowResults(false);
+    setDisplayedQuestion(null);
+    setDisplayedStreak(0);
     resetGame();
   }, [resetGame]);
 
