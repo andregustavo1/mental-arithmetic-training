@@ -339,6 +339,36 @@
     bottom: 15%;
     animation-delay: 0.6s;
   }
+
+  .minimal-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.55) hsl(var(--secondary) / 0.35);
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar-track {
+    background: hsl(var(--secondary) / 0.35);
+    border-radius: 999px;
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.55);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.75);
+    background-clip: padding-box;
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar-corner {
+    background: transparent;
+  }
   
   .particle-6 {
     left: 50%;

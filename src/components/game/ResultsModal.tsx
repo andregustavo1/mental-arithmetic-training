@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { GameStats, QuestionResult } from '@/types/game';
 import { ConsistencyChart } from './ConsistencyChart';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Trophy, Target, Zap, Clock, Flame, RotateCcw, TrendingUp, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
@@ -47,22 +46,18 @@ export function ResultsModal({
       
       {/* Modal Container - prevents zoom and handles scroll */}
       <div 
-        className="fixed inset-0 z-50 overflow-hidden"
+        className="fixed inset-0 z-50 overflow-hidden p-2 md:p-4"
         onClick={onClose}
       >
-        <div 
-          className="h-full overflow-y-auto overscroll-none touch-pan-y"
-          style={{ WebkitOverflowScrolling: 'touch' }}
-        >
-          <div className="min-h-full flex items-start md:items-center justify-center p-2 md:p-4 pb-8">
-            <div 
-              className={cn(
-                "relative w-full max-w-2xl my-2 md:my-8",
-                "bg-card border border-border rounded-xl shadow-2xl",
-                "animate-in zoom-in-95 fade-in-0 duration-300"
-              )}
-              onClick={(e) => e.stopPropagation()}
-            >
+        <div className="h-full flex items-start md:items-center justify-center">
+          <div 
+            className={cn(
+              "relative w-full max-w-2xl h-[85vh] max-h-[calc(100vh-1rem)] md:max-h-[calc(100vh-2rem)] flex flex-col",
+              "bg-card border border-border rounded-xl shadow-2xl",
+              "animate-in zoom-in-95 fade-in-0 duration-300"
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
             <div className="sticky top-0 z-10 bg-card border-b border-border px-4 md:px-6 py-3 md:py-4 flex items-center justify-between rounded-t-xl">
               <h2 className="text-lg md:text-2xl font-bold text-highlight flex items-center gap-2 md:gap-3">
@@ -78,8 +73,7 @@ export function ResultsModal({
             </div>
 
             {/* Content - Scrollable */}
-            <ScrollArea className="max-h-[60vh]">
-            <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+            <div className="minimal-scrollbar flex-1 min-h-0 overflow-y-scroll overscroll-contain p-4 md:p-6 space-y-4 md:space-y-6">
               {/* Main Stats Grid */}
               <div className="grid grid-cols-2 gap-2 md:gap-3">
                 <div className="bg-secondary/50 rounded-lg p-2.5 md:p-4 text-center">
@@ -146,7 +140,6 @@ export function ResultsModal({
                 </div>
               </div>
             </div>
-            </ScrollArea>
 
             {/* Footer */}
             <div className="sticky bottom-0 bg-card border-t border-border px-4 md:px-6 py-3 md:py-4 rounded-b-xl">
@@ -166,7 +159,6 @@ export function ResultsModal({
                   Fechar
                 </Button>
               </div>
-            </div>
             </div>
           </div>
         </div>

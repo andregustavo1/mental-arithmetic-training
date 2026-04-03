@@ -1,5 +1,4 @@
 import { SessionHistory } from '@/types/game';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { X, BarChart3, Trophy, Zap, Clock, Target, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -59,13 +58,13 @@ export function HistoryModal({
       />
       
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
+      <div className="fixed inset-0 z-50 overflow-hidden p-4">
+        <div className="h-full flex items-center justify-center">
         <div 
           className={cn(
-            "relative w-full max-w-2xl max-h-[85vh] flex flex-col",
+            "relative w-full max-w-2xl h-[85vh] max-h-[calc(100vh-2rem)] flex flex-col",
             "bg-card border border-border rounded-xl shadow-2xl",
-            "animate-in zoom-in-95 fade-in-0 duration-300",
-            "overscroll-contain"
+            "animate-in zoom-in-95 fade-in-0 duration-300"
           )}
           onClick={(e) => e.stopPropagation()}
         >
@@ -104,7 +103,7 @@ export function HistoryModal({
           </div>
 
           {/* Content - Scrollable */}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-hidden">
             {sessions.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full py-12 text-ghost">
                 <BarChart3 className="w-12 h-12 mb-4 opacity-50" />
@@ -112,7 +111,7 @@ export function HistoryModal({
                 <p className="text-sm">Complete uma sessão para ver seu histórico</p>
               </div>
             ) : (
-              <ScrollArea className="h-full max-h-[50vh]">
+              <div className="minimal-scrollbar h-full overflow-y-auto">
                 <div className="p-6 space-y-3">
                   {sessions.map((session, index) => (
                     <div 
@@ -191,7 +190,7 @@ export function HistoryModal({
                     </div>
                   ))}
                 </div>
-              </ScrollArea>
+              </div>
             )}
           </div>
 
@@ -205,6 +204,7 @@ export function HistoryModal({
               Fechar
             </Button>
           </div>
+        </div>
         </div>
       </div>
     </>
