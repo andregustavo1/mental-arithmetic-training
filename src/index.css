@@ -341,8 +341,16 @@
   }
 
   .minimal-scrollbar {
+    scrollbar-gutter: stable both-edges;
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--muted-foreground) / 0.55) hsl(var(--secondary) / 0.35);
+  }
+
+  @supports (overflow: overlay) {
+    .minimal-scrollbar {
+      overflow-y: overlay;
+      scrollbar-gutter: auto;
+    }
   }
 
   .minimal-scrollbar::-webkit-scrollbar {

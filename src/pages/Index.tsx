@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
 import { GameArea } from '@/components/game/GameArea';
 import { SettingsModal } from '@/components/settings/SettingsModal';
@@ -17,6 +17,16 @@ const Index = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [settingsSaveCount, setSettingsSaveCount] = useState(0);
+
+  useEffect(() => {
+    document.documentElement.classList.add('minimal-scrollbar');
+    document.body.classList.add('minimal-scrollbar');
+
+    return () => {
+      document.documentElement.classList.remove('minimal-scrollbar');
+      document.body.classList.remove('minimal-scrollbar');
+    };
+  }, []);
 
   const handleSaveSettings = useCallback(() => {
     setShowSettings(false);

@@ -56,7 +56,7 @@ export function SettingsModal({
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto overscroll-contain">
         <div 
           className={cn(
-            "relative w-full max-w-2xl max-h-[85vh] flex flex-col",
+            "relative w-full max-w-2xl max-h-[85vh] flex flex-col select-none",
             "bg-card border border-border rounded-xl shadow-2xl",
             "animate-in zoom-in-95 fade-in-0 duration-300",
             "overscroll-contain"
@@ -75,7 +75,7 @@ export function SettingsModal({
           </div>
 
           {/* Content - Scrollable */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="minimal-scrollbar flex-1 overflow-y-auto p-6 space-y-6">
             {/* Operations */}
             <div>
               <h3 className="text-lg font-semibold text-highlight mb-4">Operações</h3>
@@ -107,8 +107,19 @@ export function SettingsModal({
                         />
                       </div>
 
-                      {config.enabled && (
-                        <div className="space-y-3">
+                      <div
+                        className={cn(
+                          "grid transition-all duration-300 ease-out",
+                          config.enabled ? "grid-rows-[1fr] opacity-100 mt-0" : "grid-rows-[0fr] opacity-0 mt-0"
+                        )}
+                        aria-hidden={!config.enabled}
+                      >
+                        <div
+                          className={cn(
+                            "overflow-hidden space-y-3 transition-transform duration-300 ease-out",
+                            config.enabled ? "translate-y-0" : "-translate-y-1 pointer-events-none"
+                          )}
+                        >
                           {/* X1 Range */}
                           <div>
                             <Label className="text-xs text-ghost uppercase tracking-wider block mb-2">
@@ -153,7 +164,7 @@ export function SettingsModal({
                             </div>
                           </div>
                         </div>
-                      )}
+                      </div>
                     </div>
                   );
                 })}

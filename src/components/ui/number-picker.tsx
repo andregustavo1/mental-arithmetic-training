@@ -79,7 +79,7 @@ export function NumberPicker({
   };
 
   return (
-    <div className={cn("flex items-center gap-0", className)}>
+    <div className={cn("flex items-center gap-0 select-none", className)}>
       <button
         type="button"
         onClick={handleDecrement}
@@ -106,7 +106,7 @@ export function NumberPicker({
         value={value}
         onChange={handleInputChange}
         className={cn(
-          "w-14 px-1 py-1.5 text-center text-sm font-medium bg-transparent text-highlight",
+          "w-14 px-1 py-1.5 text-center text-sm font-medium bg-transparent text-highlight select-text",
           "border-none outline-none appearance-none",
           "[&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         )}
