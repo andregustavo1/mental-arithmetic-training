@@ -1,4 +1,5 @@
 export type OperationType = 'addition' | 'subtraction' | 'multiplication' | 'division';
+export type GameMode = 'classic' | 'bossHunter';
 
 export interface OperationConfig {
   enabled: boolean;
@@ -11,6 +12,7 @@ export interface OperationConfig {
 export interface GameSettings {
   operations: Record<OperationType, OperationConfig>;
   soundEnabled: boolean;
+  gameMode: GameMode;
 }
 
 export interface Question {
@@ -55,10 +57,45 @@ export interface GameStats {
   sessionDurationMs: number;
 }
 
+// Boss Hunter specific types
+export type BossHunterPhase = 'idle' | 'playing' | 'boss_incoming' | 'boss_active' | 'boss_defeated' | 'game_over';
+
+export interface BossHunterGameState {
+  isPlaying: boolean;
+  currentQuestion: Question | null;
+  results: QuestionResult[];
+  bossesDefeated: number;
+  sessionStartTime: number | null;
+  gameOverReason?: 'wrong_answer' | 'timeout';
+}
+
+export interface BossHunterStats {
+  totalOperations: number;
+  bossesDefeated: number;
+  sessionDurationMs: number;
+  opm: number;
+  averageTimeMs: number;
+  levelReached: number;
+  title: string;
+}
+
+export function getBossHunterTitle(operations: number): { title: string; level: number } {
+  if (operations >= 150) return { title: 'Absolute Genius!', level: 8 };
+  if (operations >= 100) return { title: 'Grande Gênio', level: 7 };
+  if (operations >= 75) return { title: 'Gênio', level: 6 };
+  if (operations >= 50) return { title: 'Lenda', level: 5 };
+  if (operations >= 35) return { title: 'Mestre', level: 4 };
+  if (operations >= 20) return { title: 'Caçador', level: 3 };
+  if (operations >= 10) return { title: 'Guerreiro', level: 2 };
+  return { title: 'Novato', level: 1 };
+}
+
 export interface SessionHistory {
   id: string;
   date: number; // timestamp
   stats: GameStats;
+  gameMode?: GameMode;
+  bossHunterStats?: BossHunterStats;
 }
 
 export interface SavedData {
@@ -68,4 +105,6 @@ export interface SavedData {
   totalQuestionsAnswered: number;
   totalCorrectAnswers: number;
   sessionHistory: SessionHistory[];
+  bossHunterBestRun: number;
+  bossHunterBestBosses: number;
 }
