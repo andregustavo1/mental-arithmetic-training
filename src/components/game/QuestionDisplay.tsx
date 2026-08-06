@@ -5,9 +5,10 @@ import { cn } from '@/lib/utils';
 interface QuestionDisplayProps {
   question: Question;
   feedbackState: 'idle' | 'correct' | 'wrong';
+  operationClassName?: string;
 }
 
-export function QuestionDisplay({ question, feedbackState }: QuestionDisplayProps) {
+export function QuestionDisplay({ question, feedbackState, operationClassName = 'text-primary' }: QuestionDisplayProps) {
   const [animate, setAnimate] = useState(false);
   
   // Anima quando a pergunta muda
@@ -34,7 +35,7 @@ export function QuestionDisplay({ question, feedbackState }: QuestionDisplayProp
       >
         {question.x1.toLocaleString()}
       </span>
-      <span className="text-primary">{question.displayOperation}</span>
+      <span className={operationClassName}>{question.displayOperation}</span>
       <span
         className={cn(
           "transition-all duration-300",

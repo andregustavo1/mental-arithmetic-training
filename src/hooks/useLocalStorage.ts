@@ -59,9 +59,9 @@ export function useLocalStorage() {
     saveData({ settings });
   }, [saveData]);
 
-  const updateStats = useCallback((correct: number, total: number, bestStreak: number, opm: number, stats: GameStats) => {
+  const updateStats = useCallback((correct: number, total: number, bestStreak: number, opm: number, stats: GameStats, results?: QuestionResult[]) => {
     setData(prev => {
-      const newSession: SessionHistory = { id: Date.now().toString(), date: Date.now(), stats, gameMode: 'classic' };
+      const newSession: SessionHistory = { id: Date.now().toString(), date: Date.now(), stats, gameMode: 'classic', results };
       const updatedHistory = [newSession, ...prev.sessionHistory].slice(0, 50);
       const updated = {
         ...prev,
@@ -76,7 +76,7 @@ export function useLocalStorage() {
     });
   }, []);
 
-  const updateBossHunterStats = useCallback((bhStats: BossHunterStats) => {
+  const updateBossHunterStats = useCallback((bhStats: BossHunterStats, results?: QuestionResult[]) => {
     setData(prev => {
       const newSession: SessionHistory = {
         id: Date.now().toString(),
@@ -84,6 +84,7 @@ export function useLocalStorage() {
         stats: { totalQuestions: bhStats.totalOperations, correctAnswers: bhStats.totalOperations, accuracy: 100, opm: bhStats.opm, averageTimeMs: bhStats.averageTimeMs, bestStreak: bhStats.totalOperations, sessionDurationMs: bhStats.sessionDurationMs },
         gameMode: 'bossHunter',
         bossHunterStats: bhStats,
+        results,
       };
       const updatedHistory = [newSession, ...prev.sessionHistory].slice(0, 50);
       const updated = {

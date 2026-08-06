@@ -30,12 +30,12 @@ const Index = () => {
     setSettingsSaveCount(prev => prev + 1);
   }, []);
 
-  const handleUpdateStats = useCallback((correct: number, total: number, bestStreak: number, opm: number, stats: GameStats) => {
-    updateStats(correct, total, bestStreak, opm, stats);
+  const handleUpdateStats = useCallback((correct: number, total: number, bestStreak: number, opm: number, stats: GameStats, results?: QuestionResult[]) => {
+    updateStats(correct, total, bestStreak, opm, stats, results);
   }, [updateStats]);
 
-  const handleUpdateBossHunterStats = useCallback((stats: BossHunterStats) => {
-    updateBossHunterStats(stats);
+  const handleUpdateBossHunterStats = useCallback((stats: BossHunterStats, results?: QuestionResult[]) => {
+    updateBossHunterStats(stats, results);
   }, [updateBossHunterStats]);
 
   if (!isLoaded) {
@@ -94,6 +94,7 @@ const Index = () => {
         sessions={data.sessionHistory}
         allTimeBestStreak={data.allTimeBestStreak}
         allTimeBestOpm={data.allTimeBestOpm}
+        bossHunterBestBosses={data.bossHunterBestBosses}
       />
 
       <footer className="border-t border-border py-4">

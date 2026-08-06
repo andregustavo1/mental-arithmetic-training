@@ -58,7 +58,7 @@ export interface GameStats {
 }
 
 // Boss Hunter specific types
-export type BossHunterPhase = 'idle' | 'playing' | 'boss_incoming' | 'boss_active' | 'boss_defeated' | 'game_over';
+export type BossHunterPhase = 'idle' | 'playing' | 'pre_boss' | 'boss_incoming' | 'boss_active' | 'boss_defeated' | 'game_over';
 
 export interface BossHunterGameState {
   isPlaying: boolean;
@@ -96,6 +96,7 @@ export interface SessionHistory {
   stats: GameStats;
   gameMode?: GameMode;
   bossHunterStats?: BossHunterStats;
+  results?: QuestionResult[];
 }
 
 export interface SavedData {

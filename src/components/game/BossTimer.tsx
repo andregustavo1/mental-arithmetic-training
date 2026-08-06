@@ -8,45 +8,38 @@ interface BossTimerProps {
 export function BossTimer({ timeRemainingMs, totalTimeMs }: BossTimerProps) {
   const progress = Math.max(0, Math.min(1, timeRemainingMs / totalTimeMs));
   const seconds = Math.ceil(timeRemainingMs / 1000);
-
-  const size = 100;
-  const strokeWidth = 6;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference * (1 - progress);
-
-  let ringColor: string;
-  let textColorClass: string;
-  if (progress > 0.6) {
-    ringColor = 'hsl(145, 70%, 45%)';
-    textColorClass = 'text-success';
-  } else if (progress > 0.3) {
-    ringColor = 'hsl(45, 95%, 55%)';
-    textColorClass = 'text-primary';
-  } else {
-    ringColor = 'hsl(0, 85%, 50%)';
-    textColorClass = 'text-destructive';
-  }
+  const formattedSeconds = String(seconds).padStart(2, '0');
 
   const isUrgent = seconds <= 5;
-  const isCritical = seconds <= 3;
 
   return (
-    <div className={cn("relative flex items-center justify-center", isCritical && "animate-boss-shake")}>
-      <svg width={size} height={size} className={cn(isUrgent && !isCritical && "animate-timer-pulse")}>
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(220, 15%, 18%)" strokeWidth={strokeWidth} />
-        <circle
-          cx={size / 2} cy={size / 2} r={radius}
-          fill="none" stroke={ringColor} strokeWidth={strokeWidth}
-          strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
-          style={{ transition: 'stroke-dashoffset 50ms linear', filter: `drop-shadow(0 0 ${isUrgent ? 12 : 6}px ${ringColor})` }}
-        />
-      </svg>
-      <span className={cn("absolute text-3xl font-bold tabular-nums", textColorClass, isUrgent && "animate-pulse")}>
-        {seconds}
+    <div className="w-full max-w-lg flex flex-col items-center select-none mt-2">
+      {/* Top thin divider line */}
+      <div className="w-full border-t border-slate-800/80 mb-4" />
+
+      {/* Centered 2-digit number (e.g. 08) */}
+      <span className={cn(
+        "font-mono text-lg font-bold tracking-wider tabular-nums mb-1 transition-colors duration-200",
+        isUrgent ? "text-destructive animate-pulse" : "text-emerald-400"
+      )}>
+        {formattedSeconds}
       </span>
+
+      {/* Thin solid horizontal progress line */}
+      <div className="w-full h-[3px] bg-slate-800/80 rounded-full overflow-hidden mb-3">
+        <div
+          className={cn(
+            "h-full rounded-full transition-all duration-75 ease-linear",
+            isUrgent ? "bg-destructive animate-pulse" : "bg-emerald-400 shadow-[0_0_8px_#34d399]"
+          )}
+          style={{ width: `${progress * 100}%` }}
+        />
+      </div>
+
+      {/* "pressione enter" label below bar */}
+      <p className="text-xs font-mono text-slate-500 hidden md:block">
+        pressione enter
+      </p>
     </div>
   );
 }

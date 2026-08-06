@@ -7,9 +7,10 @@ interface AnswerInputProps {
   disabled?: boolean;
   feedbackState: 'idle' | 'correct' | 'wrong';
   onKeyPress?: () => void;
+  isBossMode?: boolean;
 }
 
-export function AnswerInput({ onSubmit, disabled, feedbackState, onKeyPress }: AnswerInputProps) {
+export function AnswerInput({ onSubmit, disabled, feedbackState, onKeyPress, isBossMode = false }: AnswerInputProps) {
   const [value, setValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -79,7 +80,7 @@ export function AnswerInput({ onSubmit, disabled, feedbackState, onKeyPress }: A
         className={cn(
           "w-48 md:w-64 text-center text-4xl md:text-6xl font-medium",
           "bg-transparent border-b-4 border-muted-foreground/30",
-          "focus:border-primary focus:outline-none",
+          isBossMode ? "focus:border-destructive focus:outline-none" : "focus:border-primary focus:outline-none",
           "transition-all duration-200",
           "placeholder:text-muted-foreground/30",
           feedbackState === 'correct' && "border-success text-success",
@@ -109,9 +110,11 @@ export function AnswerInput({ onSubmit, disabled, feedbackState, onKeyPress }: A
         <span>Enter</span>
       </button>
       
-      <p className="text-sm text-ghost hidden md:block">
-        pressione enter
-      </p>
+      {!isBossMode && (
+        <p className="text-sm text-ghost hidden md:block">
+          pressione enter
+        </p>
+      )}
     </div>
   );
 }

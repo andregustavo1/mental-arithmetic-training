@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { NumberPicker } from '@/components/ui/number-picker';
 import { Button } from '@/components/ui/button';
 import { Volume2, VolumeX, X, Save, Swords, Crosshair } from 'lucide-react';
+import { BossIcon } from '@/components/ui/BossIcon';
 import { cn } from '@/lib/utils';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
@@ -63,7 +64,7 @@ export function SettingsModal({
                 </button>
                 <button onClick={() => onChangeGameMode('bossHunter')} className={cn("rounded-lg border p-4 transition-all duration-200 text-left", isBossHunter ? "bg-destructive/10 border-destructive/50 ring-2 ring-destructive/30" : "bg-secondary/20 border-border hover:bg-secondary/40")}>
                   <div className="flex items-center gap-2 mb-2">
-                    <Swords className={cn("w-5 h-5", isBossHunter ? "text-destructive" : "text-ghost")} />
+                    <BossIcon className={cn("w-5 h-5", isBossHunter ? "text-destructive" : "text-ghost")} />
                     <span className={cn("font-semibold", isBossHunter ? "text-destructive" : "text-highlight")}>Boss Hunter</span>
                   </div>
                   <p className="text-xs text-ghost">Dificuldade progressiva. Sem margem de erro. Boss a cada 5 ops.</p>

@@ -15,7 +15,7 @@ const ANIMATION_DURATION = 500; // ms for color animation
 
 interface GameAreaProps {
   settings: GameSettings;
-  onUpdateStats: (correct: number, total: number, bestStreak: number, opm: number, stats: GameStats) => void;
+  onUpdateStats: (correct: number, total: number, bestStreak: number, opm: number, stats: GameStats, results?: QuestionResult[]) => void;
   allTimeBestStreak: number;
   allTimeBestOpm: number;
 }
@@ -99,10 +99,10 @@ export function GameArea({
   }, [submitAnswer, playCorrect, playWrong, playStreak, state.streak]);
   const handleEndGame = useCallback(() => {
     const stats = calculateStats();
-    onUpdateStats(stats.correctAnswers, stats.totalQuestions, stats.bestStreak, stats.opm, stats);
+    onUpdateStats(stats.correctAnswers, stats.totalQuestions, stats.bestStreak, stats.opm, stats, state.results);
     endGame();
     setShowResults(true);
-  }, [calculateStats, onUpdateStats, endGame]);
+  }, [calculateStats, onUpdateStats, endGame, state.results]);
   const handleRestart = useCallback(() => {
     setShowResults(false);
     setDisplayedQuestion(null);
@@ -180,7 +180,7 @@ export function GameArea({
       )}
 
       {/* End Game Button */}
-      <Button onClick={handleEndGame} variant="ghost" className="text-muted-foreground hover:text-highlight">
+      <Button onClick={handleEndGame} variant="ghost" className="text-muted-foreground hover:text-white">
         <Square className="w-4 h-4 mr-2" />
         Encerrar (Esc)
       </Button>

@@ -557,4 +557,103 @@
   .animate-boss-skull {
     animation: boss-skull-float 2s ease-in-out infinite;
   }
+
+  @keyframes boss-alive {
+    0%, 100% {
+      transform: translateY(0px) scale(1) rotate(0deg);
+      filter: drop-shadow(0 0 16px hsl(var(--destructive) / 0.85)) drop-shadow(0 0 32px hsl(280 85% 55% / 0.5));
+    }
+    25% {
+      transform: translateY(-5px) scale(1.05) rotate(-2deg);
+      filter: drop-shadow(0 0 24px hsl(var(--destructive) / 0.95)) drop-shadow(0 0 45px hsl(280 85% 55% / 0.7));
+    }
+    50% {
+      transform: translateY(-9px) scale(1.1) rotate(0deg);
+      filter: drop-shadow(0 0 32px hsl(var(--destructive) / 1)) drop-shadow(0 0 55px hsl(280 85% 55% / 0.85));
+    }
+    75% {
+      transform: translateY(-4px) scale(1.04) rotate(2deg);
+      filter: drop-shadow(0 0 22px hsl(var(--destructive) / 0.9)) drop-shadow(0 0 38px hsl(280 85% 55% / 0.6));
+    }
+  }
+
+  .animate-boss-alive {
+    animation: boss-alive 2.4s ease-in-out infinite;
+  }
+
+  /* Boss Defeated Epic Sliced Skull & Gold Animation */
+  @keyframes screen-impact-shake {
+    0% { transform: translate(0, 0) scale(1); }
+    10% { transform: translate(-12px, -8px) rotate(-1.5deg); }
+    20% { transform: translate(12px, 9px) rotate(1.5deg); }
+    30% { transform: translate(-9px, 5px) rotate(-0.8deg); }
+    40% { transform: translate(7px, -5px) rotate(0.8deg); }
+    50% { transform: translate(-4px, 3px); }
+    60% { transform: translate(3px, -2px); }
+    100% { transform: translate(0, 0) scale(1); }
+  }
+
+  @keyframes slash-beam-flash {
+    0% { transform: scaleX(0) rotate(-28deg); opacity: 0; }
+    25% { transform: scaleX(1.4) rotate(-28deg); opacity: 1; }
+    60% { transform: scaleX(1.8) rotate(-28deg); opacity: 0.9; }
+    100% { transform: scaleX(2.3) rotate(-28deg); opacity: 0; }
+  }
+
+  @keyframes skull-slice-top {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 1; filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.9)); }
+    20% { transform: translate(18px, -22px) rotate(10deg); opacity: 1; filter: drop-shadow(0 0 30px rgba(251, 191, 36, 1)); }
+    100% { transform: translate(65px, -80px) rotate(35deg); opacity: 0; filter: drop-shadow(0 0 45px rgba(245, 158, 11, 0)); }
+  }
+
+  @keyframes skull-slice-bottom {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 1; filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.9)); }
+    20% { transform: translate(-18px, 22px) rotate(-10deg); opacity: 1; filter: drop-shadow(0 0 30px rgba(251, 191, 36, 1)); }
+    100% { transform: translate(-65px, 80px) rotate(-35deg); opacity: 0; filter: drop-shadow(0 0 45px rgba(245, 158, 11, 0)); }
+  }
+
+  @keyframes gold-victory-pop {
+    0% { transform: scale(0.5); opacity: 0; filter: blur(8px); }
+    45% { transform: scale(1.12); opacity: 1; filter: blur(0); }
+    75% { transform: scale(0.98); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes flash-overlay-out {
+    0% { opacity: 0.85; }
+    100% { opacity: 0; }
+  }
+
+  .gold-glow {
+    filter: drop-shadow(0 0 16px rgba(251, 191, 36, 0.9)) drop-shadow(0 0 35px rgba(245, 158, 11, 0.7));
+  }
+
+  .gold-text-glow {
+    text-shadow: 0 0 20px rgba(251, 191, 36, 0.9), 0 0 40px rgba(245, 158, 11, 0.7), 0 0 65px rgba(217, 119, 6, 0.5);
+  }
+
+  .animate-screen-impact {
+    animation: screen-impact-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
+  }
+
+  .animate-slash-beam {
+    animation: slash-beam-flash 0.45s ease-out forwards;
+  }
+
+  .animate-skull-top {
+    animation: skull-slice-top 0.95s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  }
+
+  .animate-skull-bottom {
+    animation: skull-slice-bottom 0.95s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  }
+
+  .animate-gold-victory {
+    animation: gold-victory-pop 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.15s forwards;
+    opacity: 0;
+  }
+
+  .animate-flash-overlay {
+    animation: flash-overlay-out 0.3s ease-out forwards;
+  }
 }

@@ -1,6 +1,7 @@
 import { BossHunterStats, QuestionResult, getBossHunterTitle } from '@/types/game';
 import { Button } from '@/components/ui/button';
-import { Skull, Swords, Clock, Zap, Crown, Target, RotateCcw, X, AlertTriangle, Timer } from 'lucide-react';
+import { Swords, Clock, Zap, Crown, Target, RotateCcw, X, AlertTriangle, Timer } from 'lucide-react';
+import { BossIcon } from '@/components/ui/BossIcon';
 import { cn } from '@/lib/utils';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
@@ -113,7 +114,7 @@ export function BossHunterResults({ open, onClose, onRestart, stats, results, ga
                   <p className="text-[10px] md:text-sm text-muted-foreground">recorde: {Math.max(bestRun, stats.totalOperations)}</p>
                 </div>
                 <div className="bg-secondary/50 rounded-lg p-2.5 md:p-4 text-center">
-                  <Skull className="w-4 h-4 md:w-6 md:h-6 text-destructive mx-auto mb-1 md:mb-2" />
+                  <BossIcon className="w-4 h-4 md:w-6 md:h-6 text-destructive mx-auto mb-1 md:mb-2" />
                   <p className="text-[10px] md:text-xs uppercase tracking-wider text-ghost mb-0.5 md:mb-1">Bosses Caçados</p>
                   <p className="text-lg md:text-2xl font-bold text-highlight">
                     {stats.bossesDefeated}
