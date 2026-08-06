@@ -8,7 +8,7 @@ import { useBossHunterState } from '@/hooks/useBossHunterState';
 import { useGameSounds } from '@/hooks/useSound';
 import { GameSettings, Question, BossHunterStats, QuestionResult } from '@/types/game';
 import { Button } from '@/components/ui/button';
-import { Swords, Square, Shield, Keyboard, Sparkles } from 'lucide-react';
+import { Swords, Square, Shield, Keyboard } from 'lucide-react';
 import { BossIcon } from '@/components/ui/BossIcon';
 import { cn } from '@/lib/utils';
 
@@ -78,16 +78,18 @@ export function BossHunterArea({ settings, onUpdateStats, bestRun, bestBosses }:
     }
   }, [phase, state.currentQuestion]);
 
-  // Boss timer sounds
+  // Boss timer sounds (suave nos segundos 3, 2, 1)
   const prevSecondsRef = useRef(16);
   useEffect(() => {
     if (phase !== 'boss_active') { prevSecondsRef.current = 16; return; }
     const seconds = Math.ceil(bossTimeRemainingMs / 1000);
-    if (seconds !== prevSecondsRef.current && seconds <= 5 && seconds > 0) {
+    if (seconds !== prevSecondsRef.current) {
       prevSecondsRef.current = seconds;
-      if (seconds <= 3) { playTimerUrgent(); } else { playTimerTick(); }
+      if (seconds <= 3 && seconds >= 1) {
+        playTimerTick();
+      }
     }
-  }, [bossTimeRemainingMs, phase, playTimerTick, playTimerUrgent]);
+  }, [bossTimeRemainingMs, phase, playTimerTick]);
 
   // Phase change sounds
   const prevPhaseRef = useRef(phase);
@@ -185,22 +187,10 @@ export function BossHunterArea({ settings, onUpdateStats, bestRun, bestBosses }:
             <p>Até onde você chega?</p>
           </div>
         </div>
-        <div className="flex flex-col items-center gap-3">
-          <Button onClick={handleStartGame} disabled={!hasEnabledOperation} size="lg" className="text-lg px-8 py-6 bg-destructive text-destructive-foreground hover:bg-destructive/90">
-            <Swords className="w-5 h-5 mr-2" />
-            Iniciar Caçada
-          </Button>
-
-          <Button 
-            onClick={handleTestDefeated} 
-            variant="ghost" 
-            size="sm" 
-            className="text-xs text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 transition-colors"
-          >
-            <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-400" />
-            Testar Animação de Vitória
-          </Button>
-        </div>
+        <Button onClick={handleStartGame} disabled={!hasEnabledOperation} size="lg" className="text-lg px-8 py-6 bg-destructive text-destructive-foreground hover:bg-destructive/90">
+          <Swords className="w-5 h-5 mr-2" />
+          Iniciar Caçada
+        </Button>
 
         <div className="flex items-center gap-2 text-ghost text-sm">
           <Keyboard className="w-4 h-4" />

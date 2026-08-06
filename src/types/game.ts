@@ -80,13 +80,13 @@ export interface BossHunterStats {
 }
 
 export function getBossHunterTitle(operations: number): { title: string; level: number } {
-  if (operations >= 150) return { title: 'Absolute Genius!', level: 8 };
-  if (operations >= 100) return { title: 'Grande Gênio', level: 7 };
-  if (operations >= 75) return { title: 'Gênio', level: 6 };
+  if (operations >= 100) return { title: 'Absolute Genius!', level: 8 };
+  if (operations >= 85) return { title: 'Grande Gênio', level: 7 };
+  if (operations >= 70) return { title: 'Gênio', level: 6 };
   if (operations >= 50) return { title: 'Lenda', level: 5 };
-  if (operations >= 35) return { title: 'Mestre', level: 4 };
-  if (operations >= 20) return { title: 'Caçador', level: 3 };
-  if (operations >= 10) return { title: 'Guerreiro', level: 2 };
+  if (operations >= 30) return { title: 'Mestre', level: 4 };
+  if (operations >= 15) return { title: 'Caçador', level: 3 };
+  if (operations >= 5) return { title: 'Guerreiro', level: 2 };
   return { title: 'Novato', level: 1 };
 }
 

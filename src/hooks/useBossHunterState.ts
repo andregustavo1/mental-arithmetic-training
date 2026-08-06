@@ -41,56 +41,126 @@ function getEnabledOps(settings: GameSettings): OperationType[] {
     .filter(op => settings.operations[op].enabled);
 }
 
+/**
+ * Progressão de dificuldade exponencial para o Boss Hunter.
+ *
+ * Fórmula principal:
+ *   scale = (index * 0.15) * (1 + index / 50)
+ *
+ * Isso produz uma curva que começa suave e acelera:
+ *   index  1  → scale ≈  0.15
+ *   index 10  → scale ≈  1.80
+ *   index 20  → scale ≈  4.20
+ *   index 40  → scale ≈ 10.80
+ *   index 60  → scale ≈ 19.80
+ *   index 80  → scale ≈ 31.20
+ *
+ * A lógica por operação foca em *carga cognitiva*, não apenas números maiores:
+ *   Adição      → força "vai um" (carry) com dígitos finais > 5
+ *   Subtração   → lógica reversa da adição + força "pegar emprestado" (borrow)
+ *   Multiplicação → escala controlada para não explodir cedo demais
+ *   Divisão     → divisões exatas com divisores e quocientes crescentes
+ */
 function generateBossHunterQuestion(operationIndex: number, enabledOps: OperationType[]): Question | null {
   if (enabledOps.length === 0) return null;
 
   const operation = enabledOps[Math.floor(Math.random() * enabledOps.length)];
-  const scale = operationIndex * 0.12;
+
+  // Curva exponencial suave
+  const scale = (operationIndex * 0.15) * (1 + operationIndex / 50);
 
   let x1: number, x2: number, answer: number;
 
   switch (operation) {
     case 'addition': {
-      const minX1 = 1 + Math.floor(scale * 4);
-      const maxX1 = 9 + Math.floor(scale * 12);
-      const minX2 = 1 + Math.floor(scale * 3);
-      const maxX2 = 9 + Math.floor(scale * 8);
-      x1 = randomInRange(minX1, maxX1);
-      x2 = randomInRange(minX2, maxX2);
+      // Foco em carry-over: dígitos finais altos (6-9) forçam "vai um"
+      const min = 2 + Math.floor(scale * 1.5);
+      const max = 10 + Math.floor(scale * 4);
+      x1 = randomInRange(min, max);
+      x2 = randomInRange(min, max);
+
+      // Em escala alta (>3), força pelo menos um operando com último dígito > 5
+      // para maximizar carry-over mental (ex: 38 + 47 em vez de 32 + 41)
+      if (scale > 3) {
+        const forceCarry = () => {
+          const base = randomInRange(min, max);
+          const lastDigit = base % 10;
+          if (lastDigit < 6) {
+            return base - lastDigit + randomInRange(6, 9);
+          }
+          return base;
+        };
+        x1 = forceCarry();
+        x2 = forceCarry();
+      }
+
       answer = x1 + x2;
       break;
     }
+
     case 'subtraction': {
-      const minX1 = 2 + Math.floor(scale * 4);
-      const maxX1 = 15 + Math.floor(scale * 12);
-      const minX2 = 1 + Math.floor(scale * 3);
-      const maxX2 = 9 + Math.floor(scale * 8);
-      x1 = randomInRange(minX1, maxX1);
-      x2 = randomInRange(minX2, Math.min(maxX2, x1));
-      if (x2 > x1) [x1, x2] = [x2, x1];
-      answer = x1 - x2;
+      // Lógica reversa da adição: gera A e B, o desafio é (A+B) - A = B
+      // Isso garante resultados limpos que escalam naturalmente
+      const min = 2 + Math.floor(scale * 1.5);
+      const max = 10 + Math.floor(scale * 4);
+      const a = randomInRange(min, max);
+      const b = randomInRange(min, max);
+
+      x1 = a + b;   // minuendo (sempre maior)
+      x2 = a;        // subtraendo
+      answer = b;
+
+      // Em escala alta (>5), força "pegar emprestado" (borrow):
+      // unidade do minuendo < unidade do subtraendo (ex: 42 - 18)
+      if (scale > 5 && x1 > 20) {
+        const x1Units = x1 % 10;
+        const x2Units = x2 % 10;
+        // Se não precisa borrowing, ajusta o subtraendo para forçar
+        if (x1Units >= x2Units) {
+          const newX2Units = randomInRange(x1Units + 1, 9);
+          x2 = x2 - x2Units + newX2Units;
+          if (x2 >= x1) x2 = x1 - randomInRange(1, 5);
+          answer = x1 - x2;
+        }
+      }
+
       break;
     }
+
     case 'multiplication': {
-      const minX1 = 2 + Math.floor(scale * 1.5);
-      const maxX1 = 9 + Math.floor(scale * 4);
-      const minX2 = 2;
-      const maxX2 = 5 + Math.floor(scale * 1.5);
-      x1 = randomInRange(minX1, maxX1);
-      x2 = randomInRange(minX2, maxX2);
+      // Escala controlada — multiplicação explode rápido em dificuldade
+      // Início: tabuadas 2-5 × 2-9
+      // Intermediário: 6-9 × números de 2 dígitos baixos
+      // Avançado: 2 dígitos × 1 dígito complexo
+      const num1Min = 2 + Math.floor(scale / 3);
+      const num1Max = 5 + Math.floor(scale / 1.5);
+      const num2Min = 2 + Math.floor(scale / 4);
+      const num2Max = 9 + Math.floor(scale / 1.2);
+
+      x1 = randomInRange(num1Min, num1Max);
+      x2 = randomInRange(num2Min, num2Max);
+
+      // Garante que o maior número fique à esquerda para leitura natural
+      if (x2 > x1) [x1, x2] = [x2, x1];
+
       answer = x1 * x2;
       break;
     }
+
     case 'division': {
-      const minDivisor = 2;
-      const maxDivisor = 5 + Math.floor(scale * 1.5);
-      const minAnswer = 2 + Math.floor(scale * 1);
-      const maxAnswer = 9 + Math.floor(scale * 3);
+      // Divisões sempre exatas. Escala o divisor para sair da zona de conforto
+      // Late game: divisões como 225 ÷ 15 ou 144 ÷ 8
+      const minDivisor = 2 + Math.floor(scale / 4);
+      const maxDivisor = 5 + Math.floor(scale / 1.2);
+      const minQuotient = 2 + Math.floor(scale / 3);
+      const maxQuotient = 9 + Math.floor(scale / 1.5);
+
       x2 = randomInRange(minDivisor, maxDivisor);
-      answer = randomInRange(minAnswer, maxAnswer);
-      x1 = x2 * answer;
+      answer = randomInRange(minQuotient, maxQuotient);
+      x1 = x2 * answer;  // garante divisão exata
       break;
     }
+
     default:
       x1 = 1; x2 = 1; answer = 2;
   }

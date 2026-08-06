@@ -10,7 +10,20 @@ export function BossTimer({ timeRemainingMs, totalTimeMs }: BossTimerProps) {
   const seconds = Math.ceil(timeRemainingMs / 1000);
   const formattedSeconds = String(seconds).padStart(2, '0');
 
-  const isUrgent = seconds <= 5;
+  // Color transitions without blinking: Verde (>5s) -> Amarelo (4-5s) -> Vermelho (<=3s)
+  let textColor: string;
+  let barColor: string;
+
+  if (seconds > 5) {
+    textColor = "text-emerald-400";
+    barColor = "bg-emerald-400";
+  } else if (seconds > 3) {
+    textColor = "text-amber-400";
+    barColor = "bg-amber-400";
+  } else {
+    textColor = "text-destructive";
+    barColor = "bg-destructive";
+  }
 
   return (
     <div className="w-full max-w-lg flex flex-col items-center select-none mt-2">
@@ -19,8 +32,8 @@ export function BossTimer({ timeRemainingMs, totalTimeMs }: BossTimerProps) {
 
       {/* Centered 2-digit number (e.g. 08) */}
       <span className={cn(
-        "font-mono text-lg font-bold tracking-wider tabular-nums mb-1 transition-colors duration-200",
-        isUrgent ? "text-destructive animate-pulse" : "text-emerald-400"
+        "font-mono text-lg font-bold tracking-wider tabular-nums mb-1 transition-colors duration-300",
+        textColor
       )}>
         {formattedSeconds}
       </span>
@@ -29,8 +42,8 @@ export function BossTimer({ timeRemainingMs, totalTimeMs }: BossTimerProps) {
       <div className="w-full h-[3px] bg-slate-800/80 rounded-full overflow-hidden mb-3">
         <div
           className={cn(
-            "h-full rounded-full transition-all duration-75 ease-linear",
-            isUrgent ? "bg-destructive animate-pulse" : "bg-emerald-400 shadow-[0_0_8px_#34d399]"
+            "h-full rounded-full transition-all duration-100 ease-linear",
+            barColor
           )}
           style={{ width: `${progress * 100}%` }}
         />
