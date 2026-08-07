@@ -11,6 +11,7 @@ import {
 } from '@/types/game';
 
 const BOSS_TIME_LIMIT = 15000;
+const NORMAL_TIME_LIMIT = 60000;
 
 // Timing constants for the boss transition sequence:
 // After answering the last normal op before a boss:
@@ -184,7 +185,8 @@ const initialState: BossHunterGameState = {
 export function useBossHunterState(settings: GameSettings) {
   const [state, setState] = useState<BossHunterGameState>(initialState);
   const [phase, setPhase] = useState<BossHunterPhase>('idle');
-  const [bossTimeRemainingMs, setBossTimeRemainingMs] = useState(BOSS_TIME_LIMIT);
+  const [bossTimeRemainingMs, setBossTimeRemainingMs] = useState(NORMAL_TIME_LIMIT);
+  const [currentTotalTimeMs, setCurrentTotalTimeMs] = useState(NORMAL_TIME_LIMIT);
 
   const questionStartRef = useRef<number | null>(null);
   const bossTimerRef = useRef<number | null>(null);
@@ -230,10 +232,11 @@ export function useBossHunterState(settings: GameSettings) {
   const triggerGameOverRef = useRef(triggerGameOver);
   useEffect(() => { triggerGameOverRef.current = triggerGameOver; }, [triggerGameOver]);
 
-  const startBossTimer = useCallback(() => {
+  const startTimer = useCallback((limitMs: number) => {
     clearBossTimer();
-    const deadline = Date.now() + BOSS_TIME_LIMIT;
-    setBossTimeRemainingMs(BOSS_TIME_LIMIT);
+    setCurrentTotalTimeMs(limitMs);
+    const deadline = Date.now() + limitMs;
+    setBossTimeRemainingMs(limitMs);
     bossTimerRef.current = window.setInterval(() => {
       const remaining = deadline - Date.now();
       if (remaining <= 0) {
@@ -273,7 +276,8 @@ export function useBossHunterState(settings: GameSettings) {
       gameOverReason: undefined,
     });
     setPhase('playing');
-  }, [settings, clearTransitionTimeouts, clearBossTimer]);
+    startTimer(NORMAL_TIME_LIMIT);
+  }, [settings, clearTransitionTimeouts, clearBossTimer, startTimer]);
 
   const submitAnswer = useCallback((userAnswer: number): {
     result: QuestionResult;
@@ -303,7 +307,7 @@ export function useBossHunterState(settings: GameSettings) {
 
     // --- WRONG ANSWER: game over ---
     if (!isCorrect) {
-      if (currentIsBoss) clearBossTimer();
+      clearBossTimer();
       setState(prev => ({ ...prev, results: [...prev.results, result] }));
       return { result, gameOver: true, reason: 'wrong_answer', bossDefeated: false };
     }
@@ -316,7 +320,7 @@ export function useBossHunterState(settings: GameSettings) {
     const enabledOps = getEnabledOps(settings);
     const nextQuestion = generateBossHunterQuestion(nextOpIndex, enabledOps);
 
-    if (currentIsBoss) clearBossTimer();
+    clearBossTimer();
 
     // =========================================================
     // CASE 1: Current op was a boss — show "boss defeated" overlay
@@ -332,7 +336,7 @@ export function useBossHunterState(settings: GameSettings) {
 
       addTimeout(() => {
         if (nextIsBoss) {
-          // Rare: two bosses in a row (would only happen if 5 changes)
+          // Rare: two bosses in a row
           pendingBossQuestionRef.current = nextQuestion;
           setPhase('boss_incoming');
           addTimeout(() => {
@@ -340,13 +344,14 @@ export function useBossHunterState(settings: GameSettings) {
             pendingBossQuestionRef.current = null;
             setState(prev => ({ ...prev, currentQuestion: bossQuestion }));
             setPhase('boss_active');
-            startBossTimer();
+            startTimer(BOSS_TIME_LIMIT);
             questionStartRef.current = Date.now();
           }, BOSS_INCOMING_DURATION_MS);
         } else {
           // Normal: continue to next regular question
           setState(prev => ({ ...prev, currentQuestion: nextQuestion }));
           setPhase('playing');
+          startTimer(NORMAL_TIME_LIMIT);
           questionStartRef.current = Date.now();
         }
       }, BOSS_DEFEATED_DURATION_MS);
@@ -358,9 +363,6 @@ export function useBossHunterState(settings: GameSettings) {
     // CASE 2: Next op IS a boss — enter the "breathing room" sequence
     // =========================================================
     if (nextIsBoss) {
-      // Store the boss question for later — do NOT put it in state yet.
-      // This also serves as a guard: submitAnswer will return null if this ref is set,
-      // preventing double-submission during the feedback delay window.
       pendingBossQuestionRef.current = nextQuestion;
 
       // Update results only; keep currentQuestion as-is so the green feedback
@@ -388,7 +390,7 @@ export function useBossHunterState(settings: GameSettings) {
               currentQuestion: bossQuestion,
             }));
             setPhase('boss_active');
-            startBossTimer();
+            startTimer(BOSS_TIME_LIMIT);
             questionStartRef.current = Date.now();
           }, BOSS_INCOMING_DURATION_MS);
         }, PRE_BOSS_DURATION_MS);
@@ -405,10 +407,11 @@ export function useBossHunterState(settings: GameSettings) {
       currentQuestion: nextQuestion,
       results: newResults,
     }));
+    startTimer(NORMAL_TIME_LIMIT);
     questionStartRef.current = Date.now();
 
     return { result, gameOver: false, bossDefeated: false };
-  }, [state, settings, clearBossTimer, startBossTimer, addTimeout]);
+  }, [state, settings, clearBossTimer, startTimer, addTimeout]);
 
   const endGame = useCallback(() => {
     clearBossTimer();
@@ -445,5 +448,5 @@ export function useBossHunterState(settings: GameSettings) {
     };
   }, [state]);
 
-  return { state, phase, bossTimeRemainingMs, startGame, submitAnswer, endGame, resetGame, triggerGameOver, calculateStats };
+  return { state, phase, bossTimeRemainingMs, currentTotalTimeMs, startGame, submitAnswer, endGame, resetGame, triggerGameOver, calculateStats };
 }

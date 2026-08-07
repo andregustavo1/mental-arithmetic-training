@@ -25,7 +25,7 @@ const ANIMATION_DURATION = 300;
 
 export function BossHunterArea({ settings, onUpdateStats, bestRun, bestBosses }: BossHunterAreaProps) {
   const {
-    state, phase, bossTimeRemainingMs,
+    state, phase, bossTimeRemainingMs, currentTotalTimeMs,
     startGame, submitAnswer, endGame, resetGame, triggerGameOver, calculateStats,
   } = useBossHunterState(settings);
 
@@ -78,10 +78,10 @@ export function BossHunterArea({ settings, onUpdateStats, bestRun, bestBosses }:
     }
   }, [phase, state.currentQuestion]);
 
-  // Boss timer sounds (suave nos segundos 3, 2, 1)
-  const prevSecondsRef = useRef(16);
+  // Timer sounds (suave nos segundos 3, 2, 1)
+  const prevSecondsRef = useRef(61);
   useEffect(() => {
-    if (phase !== 'boss_active') { prevSecondsRef.current = 16; return; }
+    if (phase !== 'boss_active' && phase !== 'playing') { prevSecondsRef.current = 61; return; }
     const seconds = Math.ceil(bossTimeRemainingMs / 1000);
     if (seconds !== prevSecondsRef.current) {
       prevSecondsRef.current = seconds;
@@ -183,7 +183,7 @@ export function BossHunterArea({ settings, onUpdateStats, bestRun, bestBosses }:
           </h2>
           <div className="text-sm text-ghost text-center max-w-sm space-y-1">
             <p>Dificuldade progressiva. Sem margem de erro.</p>
-            <p>A cada 5 operações, enfrente um <span className="text-destructive font-medium">Boss</span> com 15s para responder.</p>
+            <p>60s por operação. A cada 5 operações, um <span className="text-destructive font-medium">Boss</span> com 15s!</p>
             <p>Até onde você chega?</p>
           </div>
         </div>
@@ -279,12 +279,17 @@ export function BossHunterArea({ settings, onUpdateStats, bestRun, bestBosses }:
           {displayedQuestion && (
             <QuestionDisplay question={displayedQuestion} feedbackState={feedbackState} operationClassName="text-destructive" />
           )}
-          <AnswerInput onSubmit={handleSubmit} feedbackState={feedbackState} onKeyPress={playKeypress} isBossMode disabled={false} />
+          <AnswerInput
+            onSubmit={handleSubmit}
+            feedbackState={feedbackState}
+            onKeyPress={playKeypress}
+            isBossMode
+            disabled={false}
+            targetLength={displayedQuestion ? String(Math.abs(displayedQuestion.answer)).length : undefined}
+          />
 
-          {/* Horizontal Countdown Bar below input during boss fight */}
-          {phase === 'boss_active' && (
-            <BossTimer timeRemainingMs={bossTimeRemainingMs} totalTimeMs={15000} />
-          )}
+          {/* Horizontal Countdown Bar below input */}
+          <BossTimer timeRemainingMs={bossTimeRemainingMs} totalTimeMs={currentTotalTimeMs} />
         </div>
       )}
 

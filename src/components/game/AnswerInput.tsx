@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { cn } from '@/lib/utils';
-import { CornerDownLeft } from 'lucide-react';
 
 interface AnswerInputProps {
   onSubmit: (answer: number) => void;
@@ -8,9 +7,17 @@ interface AnswerInputProps {
   feedbackState: 'idle' | 'correct' | 'wrong';
   onKeyPress?: () => void;
   isBossMode?: boolean;
+  targetLength?: number;
 }
 
-export function AnswerInput({ onSubmit, disabled, feedbackState, onKeyPress, isBossMode = false }: AnswerInputProps) {
+export function AnswerInput({
+  onSubmit,
+  disabled,
+  feedbackState,
+  onKeyPress,
+  isBossMode = false,
+  targetLength,
+}: AnswerInputProps) {
   const [value, setValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -47,23 +54,22 @@ export function AnswerInput({ onSubmit, disabled, feedbackState, onKeyPress, isB
       // Allow backspace/delete
     } else if (!/^\d$/.test(e.key) && e.key !== '-') {
       e.preventDefault();
-    } else {
-      onKeyPress?.();
     }
   };
 
-  const handleSubmit = () => {
-    if (value.trim()) {
-      const numValue = parseInt(value, 10);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled || feedbackState !== 'idle') return;
+
+    const newValue = e.target.value.replace(/[^\d-]/g, '');
+    setValue(newValue);
+    onKeyPress?.();
+
+    if (targetLength && targetLength > 0 && newValue.length >= targetLength) {
+      const numValue = parseInt(newValue, 10);
       if (!isNaN(numValue)) {
         onSubmit(numValue);
       }
     }
-  };
-
-  // Prevenir que o botão roube o foco do input no mobile
-  const handleButtonMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
   };
 
   return (
@@ -72,10 +78,13 @@ export function AnswerInput({ onSubmit, disabled, feedbackState, onKeyPress, isB
         ref={inputRef}
         type="text"
         inputMode="numeric"
+        pattern="[0-9]*"
+        name="math_answer_field"
+        id="math_answer_field"
         value={value}
-        onChange={(e) => setValue(e.target.value.replace(/[^\d-]/g, ''))}
+        onChange={handleChange}
         onKeyDown={handleKeyDown}
-        disabled={disabled}
+        disabled={disabled || feedbackState !== 'idle'}
         placeholder="?"
         className={cn(
           "w-48 md:w-64 text-center text-4xl md:text-6xl font-medium",
@@ -86,35 +95,14 @@ export function AnswerInput({ onSubmit, disabled, feedbackState, onKeyPress, isB
           feedbackState === 'correct' && "border-success text-success",
           feedbackState === 'wrong' && "border-destructive text-destructive"
         )}
-        autoComplete="off"
+        autoComplete="one-time-code"
+        autoCapitalize="off"
         autoCorrect="off"
         spellCheck={false}
+        data-lpignore="true"
+        data-1p-ignore="true"
+        data-form-type="other"
       />
-      
-      {/* Mobile submit button - same width as input, below it */}
-      <button
-        onMouseDown={handleButtonMouseDown}
-        onTouchStart={handleButtonMouseDown}
-        onClick={handleSubmit}
-        disabled={disabled || !value.trim()}
-        className={cn(
-          "md:hidden w-48 py-3 rounded-lg transition-all duration-200",
-          "flex items-center justify-center gap-2",
-          "bg-primary text-primary-foreground font-medium",
-          "hover:bg-primary/90 active:scale-95",
-          "disabled:opacity-50 disabled:cursor-not-allowed"
-        )}
-        aria-label="Enviar resposta"
-      >
-        <CornerDownLeft className="w-5 h-5" />
-        <span>Enter</span>
-      </button>
-      
-      {!isBossMode && (
-        <p className="text-sm text-ghost hidden md:block">
-          pressione enter
-        </p>
-      )}
     </div>
   );
 }

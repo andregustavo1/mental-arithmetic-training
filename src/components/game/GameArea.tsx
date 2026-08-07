@@ -163,7 +163,12 @@ export function GameArea({
           <QuestionDisplay question={displayedQuestion} feedbackState={feedbackState} />
         )}
 
-        <AnswerInput onSubmit={handleSubmit} feedbackState={feedbackState} onKeyPress={playKeypress} />
+        <AnswerInput
+          onSubmit={handleSubmit}
+          feedbackState={feedbackState}
+          onKeyPress={playKeypress}
+          targetLength={displayedQuestion ? String(Math.abs(displayedQuestion.answer)).length : undefined}
+        />
         
         {/* Streak Display - centered below answer */}
         <div className="flex flex-col items-center mt-4">
