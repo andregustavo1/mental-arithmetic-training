@@ -182,6 +182,8 @@ const initialState: BossHunterGameState = {
   gameOverReason: undefined,
 };
 
+const BOSS_FAILED_KEY = 'mathtype-failed-bosshunter';
+
 export function useBossHunterState(settings: GameSettings) {
   const [state, setState] = useState<BossHunterGameState>(initialState);
   const [phase, setPhase] = useState<BossHunterPhase>('idle');
@@ -191,6 +193,7 @@ export function useBossHunterState(settings: GameSettings) {
   const questionStartRef = useRef<number | null>(null);
   const bossTimerRef = useRef<number | null>(null);
   const phaseRef = useRef<BossHunterPhase>('idle');
+  const lastFailedQuestionRef = useRef<Question | null>(null);
 
   // Store all pending transition timeouts so we can cancel them on cleanup
   const transitionTimeoutsRef = useRef<number[]>([]);
@@ -214,7 +217,6 @@ export function useBossHunterState(settings: GameSettings) {
 
   const addTimeout = useCallback((fn: () => void, ms: number) => {
     const id = window.setTimeout(() => {
-      // Remove this timeout from the list once it fires
       transitionTimeoutsRef.current = transitionTimeoutsRef.current.filter(t => t !== id);
       fn();
     }, ms);
@@ -222,12 +224,48 @@ export function useBossHunterState(settings: GameSettings) {
     return id;
   }, []);
 
+  const saveFailedQuestion = useCallback((q: Question | null | undefined) => {
+    lastFailedQuestionRef.current = q || null;
+    try {
+      if (q && q.x1 !== undefined && q.answer !== undefined) {
+        localStorage.setItem(BOSS_FAILED_KEY, JSON.stringify(q));
+      } else {
+        localStorage.removeItem(BOSS_FAILED_KEY);
+      }
+    } catch (e) {}
+  }, []);
+
+  const getAndClearFailedQuestion = useCallback((settings: GameSettings): Question | null => {
+    let q: Question | null = lastFailedQuestionRef.current;
+    lastFailedQuestionRef.current = null;
+    if (!q) {
+      try {
+        const stored = localStorage.getItem(BOSS_FAILED_KEY);
+        if (stored && stored !== 'undefined' && stored !== 'null') {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed.answer === 'number') {
+            q = parsed;
+          }
+        }
+      } catch (e) {}
+    }
+    try { localStorage.removeItem(BOSS_FAILED_KEY); } catch (e) {}
+
+    if (q && !settings.operations[q.operation]?.enabled) {
+      return null;
+    }
+    return q;
+  }, []);
+
   const triggerGameOver = useCallback((reason: 'wrong_answer' | 'timeout') => {
     clearBossTimer();
     clearTransitionTimeouts();
+    if (state.currentQuestion) {
+      saveFailedQuestion(state.currentQuestion);
+    }
     setState(prev => ({ ...prev, isPlaying: false, gameOverReason: reason }));
     setPhase('game_over');
-  }, [clearBossTimer, clearTransitionTimeouts]);
+  }, [clearBossTimer, clearTransitionTimeouts, state.currentQuestion, saveFailedQuestion]);
 
   const triggerGameOverRef = useRef(triggerGameOver);
   useEffect(() => { triggerGameOverRef.current = triggerGameOver; }, [triggerGameOver]);
@@ -263,8 +301,13 @@ export function useBossHunterState(settings: GameSettings) {
     clearBossTimer();
     pendingBossQuestionRef.current = null;
     const enabledOps = getEnabledOps(settings);
-    const question = generateBossHunterQuestion(0, enabledOps);
+
+    let question = getAndClearFailedQuestion(settings);
+    if (!question) {
+      question = generateBossHunterQuestion(0, enabledOps);
+    }
     if (!question) return;
+
     const now = Date.now();
     questionStartRef.current = now;
     setState({
@@ -277,7 +320,7 @@ export function useBossHunterState(settings: GameSettings) {
     });
     setPhase('playing');
     startTimer(NORMAL_TIME_LIMIT);
-  }, [settings, clearTransitionTimeouts, clearBossTimer, startTimer]);
+  }, [settings, clearTransitionTimeouts, clearBossTimer, startTimer, getAndClearFailedQuestion]);
 
   const submitAnswer = useCallback((userAnswer: number): {
     result: QuestionResult;
@@ -308,6 +351,7 @@ export function useBossHunterState(settings: GameSettings) {
     // --- WRONG ANSWER: game over ---
     if (!isCorrect) {
       clearBossTimer();
+      saveFailedQuestion(state.currentQuestion);
       setState(prev => ({ ...prev, results: [...prev.results, result] }));
       return { result, gameOver: true, reason: 'wrong_answer', bossDefeated: false };
     }
@@ -411,7 +455,7 @@ export function useBossHunterState(settings: GameSettings) {
     questionStartRef.current = Date.now();
 
     return { result, gameOver: false, bossDefeated: false };
-  }, [state, settings, clearBossTimer, startTimer, addTimeout]);
+  }, [state, settings, clearBossTimer, startTimer, addTimeout, saveFailedQuestion]);
 
   const endGame = useCallback(() => {
     clearBossTimer();

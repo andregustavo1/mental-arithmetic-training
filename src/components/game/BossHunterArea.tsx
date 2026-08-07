@@ -222,7 +222,7 @@ export function BossHunterArea({ settings, onUpdateStats, bestRun, bestBosses }:
 
       {/* Pre-Boss Breathing Room */}
       {phase === 'pre_boss' && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-background/90 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-4 animate-in fade-in-0 zoom-in-95 duration-300">
             <p className="text-lg text-ghost">Preparando para o Boss...</p>
             <div className="flex items-center gap-2 text-destructive animate-pulse">
@@ -293,9 +293,9 @@ export function BossHunterArea({ settings, onUpdateStats, bestRun, bestBosses }:
         </div>
       )}
 
-      {/* End Button */}
-      {phase !== 'game_over' && (
-        <Button onClick={handleEndGame} variant="ghost" className="text-muted-foreground hover: hover:bg-destructive transition-colors duration-200">
+      {/* End Button — only during active gameplay */}
+      {(phase === 'playing' || phase === 'boss_active') && (
+        <Button onClick={handleEndGame} variant="ghost" className="text-muted-foreground hover:hover:bg-destructive transition-colors duration-200">
           <Square className="w-4 h-4 mr-2" />
           Encerrar (Esc)
         </Button>

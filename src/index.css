@@ -558,6 +558,31 @@
     animation: boss-skull-float 2s ease-in-out infinite;
   }
 
+  /* Rank Animations */
+  @keyframes spin-slow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes brain-pulse {
+    0%, 100% {
+      transform: scale(1.1) translateY(0);
+      filter: drop-shadow(0 0 25px rgba(244, 114, 182, 0.8)) drop-shadow(0 0 50px rgba(168, 85, 247, 0.6));
+    }
+    50% {
+      transform: scale(1.25) translateY(-6px);
+      filter: drop-shadow(0 0 40px rgba(244, 114, 182, 1)) drop-shadow(0 0 80px rgba(234, 179, 8, 0.8));
+    }
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 12s linear infinite;
+  }
+
+  .animate-brain-pulse {
+    animation: brain-pulse 2.5s ease-in-out infinite;
+  }
+
   @keyframes boss-alive {
     0%, 100% {
       transform: translateY(0px) scale(1) rotate(0deg);

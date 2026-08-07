@@ -76,12 +76,51 @@ const initialState: GameState = {
   questionStartTime: null,
 };
 
+const CLASSIC_FAILED_KEY = 'mathtype-failed-classic';
+
 export function useGameState(settings: GameSettings) {
   const [state, setState] = useState<GameState>(initialState);
   const questionStartRef = useRef<number | null>(null);
+  const lastFailedQuestionRef = useRef<Question | null>(null);
+
+  const saveFailedQuestion = useCallback((q: Question | null | undefined) => {
+    lastFailedQuestionRef.current = q || null;
+    try {
+      if (q && q.x1 !== undefined && q.answer !== undefined) {
+        localStorage.setItem(CLASSIC_FAILED_KEY, JSON.stringify(q));
+      } else {
+        localStorage.removeItem(CLASSIC_FAILED_KEY);
+      }
+    } catch (e) {}
+  }, []);
+
+  const getAndClearFailedQuestion = useCallback((settings: GameSettings): Question | null => {
+    let q: Question | null = lastFailedQuestionRef.current;
+    lastFailedQuestionRef.current = null;
+    if (!q) {
+      try {
+        const stored = localStorage.getItem(CLASSIC_FAILED_KEY);
+        if (stored && stored !== 'undefined' && stored !== 'null') {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed.answer === 'number') {
+            q = parsed;
+          }
+        }
+      } catch (e) {}
+    }
+    try { localStorage.removeItem(CLASSIC_FAILED_KEY); } catch (e) {}
+
+    if (q && !settings.operations[q.operation]?.enabled) {
+      return null;
+    }
+    return q;
+  }, []);
 
   const startGame = useCallback(() => {
-    const question = generateQuestion(settings);
+    let question = getAndClearFailedQuestion(settings);
+    if (!question) {
+      question = generateQuestion(settings);
+    }
     if (!question) return;
     
     const now = Date.now();
@@ -97,7 +136,7 @@ export function useGameState(settings: GameSettings) {
       sessionStartTime: now,
       questionStartTime: now,
     });
-  }, [settings]);
+  }, [settings, getAndClearFailedQuestion]);
 
   const submitAnswer = useCallback((userAnswer: number): SubmitAnswerResult | null => {
     if (!state.currentQuestion || questionStartRef.current === null) return null;
@@ -113,6 +152,10 @@ export function useGameState(settings: GameSettings) {
       timeMs,
       timestamp: now,
     };
+
+    if (!isCorrect) {
+      saveFailedQuestion(state.currentQuestion);
+    }
     
     const newStreak = isCorrect ? state.streak + 1 : 0;
     const newBestStreak = Math.max(state.bestStreak, newStreak);
@@ -132,7 +175,7 @@ export function useGameState(settings: GameSettings) {
     }));
     
     return { result, nextQuestion };
-  }, [state, settings]);
+  }, [state, settings, saveFailedQuestion]);
 
   const endGame = useCallback(() => {
     setState(prev => ({

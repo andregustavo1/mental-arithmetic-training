@@ -1,6 +1,9 @@
 import { BossHunterStats, QuestionResult, getBossHunterTitle } from '@/types/game';
 import { Button } from '@/components/ui/button';
-import { Swords, Clock, Zap, Crown, Target, RotateCcw, X, AlertTriangle, Timer } from 'lucide-react';
+import {
+  Swords, Clock, Zap, Target, RotateCcw, X, AlertTriangle, Timer,
+  Sprout, Shield, Crosshair, Award, Flame, Lightbulb, Sparkles, Brain
+} from 'lucide-react';
 import { BossIcon } from '@/components/ui/BossIcon';
 import { cn } from '@/lib/utils';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
@@ -16,19 +19,81 @@ interface BossHunterResultsProps {
   bestBosses: number;
 }
 
-function getTitleColor(level: number): string {
-  switch (level) {
-    case 1: return 'text-ghost';
-    case 2: return 'text-dim';
-    case 3: return 'fire-yellow';
-    case 4: return 'fire-orange';
-    case 5: return 'fire-red';
-    case 6: return 'fire-blue';
-    case 7: return 'fire-purple';
-    case 8: return 'fire-purple';
-    default: return 'text-highlight';
-  }
+interface RankUI {
+  level: number;
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  iconClass: string;
+  titleClass: string;
+  glowBg: string;
 }
+
+const RANK_UI_CONFIGS: Record<number, RankUI> = {
+  1: {
+    level: 1,
+    title: 'Novato',
+    icon: Sprout,
+    iconClass: 'w-10 h-10 md:w-12 md:h-12 text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.5)] animate-pulse',
+    titleClass: 'text-emerald-400 font-bold text-2xl md:text-3xl',
+    glowBg: 'from-emerald-500/10 via-transparent to-transparent',
+  },
+  2: {
+    level: 2,
+    title: 'Guerreiro',
+    icon: Swords,
+    iconClass: 'w-10 h-10 md:w-12 md:h-12 text-slate-200 drop-shadow-[0_0_15px_rgba(203,213,225,0.6)] animate-pulse',
+    titleClass: 'text-slate-200 font-extrabold text-2xl md:text-3xl tracking-wide',
+    glowBg: 'from-slate-400/10 via-transparent to-transparent',
+  },
+  3: {
+    level: 3,
+    title: 'Caçador',
+    icon: Crosshair,
+    iconClass: 'w-11 h-11 md:w-14 md:h-14 text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.7)] animate-pulse',
+    titleClass: 'fire-yellow font-extrabold text-3xl md:text-4xl tracking-wide',
+    glowBg: 'from-amber-500/15 via-transparent to-transparent',
+  },
+  4: {
+    level: 4,
+    title: 'Mestre',
+    icon: Award,
+    iconClass: 'w-12 h-12 md:w-14 md:h-14 text-orange-500 drop-shadow-[0_0_25px_rgba(249,115,22,0.8)] animate-bounce',
+    titleClass: 'fire-orange font-black text-3xl md:text-4xl tracking-wider',
+    glowBg: 'from-orange-500/20 via-transparent to-transparent',
+  },
+  5: {
+    level: 5,
+    title: 'Lenda',
+    icon: Flame,
+    iconClass: 'w-12 h-12 md:w-16 md:h-16 text-red-500 drop-shadow-[0_0_30px_rgba(239,68,68,0.9)] flame-dance',
+    titleClass: 'fire-red font-black text-3xl md:text-4xl tracking-wider',
+    glowBg: 'from-red-500/25 via-transparent to-transparent',
+  },
+  6: {
+    level: 6,
+    title: 'Gênio',
+    icon: Lightbulb,
+    iconClass: 'w-12 h-12 md:w-16 md:h-16 text-cyan-400 drop-shadow-[0_0_35px_rgba(34,211,238,0.95)] animate-pulse scale-110',
+    titleClass: 'fire-blue font-black text-3xl md:text-4xl tracking-widest',
+    glowBg: 'from-cyan-500/25 via-transparent to-transparent',
+  },
+  7: {
+    level: 7,
+    title: 'Grande Gênio',
+    icon: Sparkles,
+    iconClass: 'w-14 h-14 md:w-16 md:h-16 text-purple-400 drop-shadow-[0_0_40px_rgba(192,132,252,1)] animate-spin-slow scale-110',
+    titleClass: 'fire-purple font-black text-3xl md:text-5xl tracking-widest',
+    glowBg: 'from-purple-500/30 via-transparent to-transparent',
+  },
+  8: {
+    level: 8,
+    title: 'Absolute Genius!',
+    icon: Brain,
+    iconClass: 'w-16 h-16 md:w-20 md:h-20 text-pink-400 drop-shadow-[0_0_45px_rgba(244,114,182,1)] animate-brain-pulse scale-125',
+    titleClass: 'bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400 bg-clip-text text-transparent font-black text-3xl md:text-5xl tracking-widest animate-pulse',
+    glowBg: 'from-pink-500/30 via-purple-500/15 to-amber-500/10',
+  },
+};
 
 function getGameOverMessage(reason?: 'wrong_answer' | 'timeout'): { title: string; icon: React.ReactNode; colorClass: string } {
   switch (reason) {
@@ -45,8 +110,9 @@ export function BossHunterResults({ open, onClose, onRestart, stats, results, ga
   useBodyScrollLock(open);
   if (!open) return null;
 
-  const { title: rankTitle, level } = getBossHunterTitle(stats.totalOperations);
-  const titleColor = getTitleColor(level);
+  const { level } = getBossHunterTitle(stats.totalOperations);
+  const rankUI = RANK_UI_CONFIGS[level] || RANK_UI_CONFIGS[1];
+  const RankIconComponent = rankUI.icon;
   const gameOver = getGameOverMessage(gameOverReason);
   const isNewBestRun = stats.totalOperations > bestRun && stats.totalOperations > 0;
   const isNewBestBosses = stats.bossesDefeated > bestBosses && stats.bossesDefeated > 0;
@@ -94,12 +160,21 @@ export function BossHunterResults({ open, onClose, onRestart, stats, results, ga
                 </div>
               )}
 
-              {/* Rank */}
-              <div className="text-center py-2">
-                <Crown className="w-8 h-8 md:w-10 md:h-10 text-primary mx-auto mb-2" />
-                <p className="text-xs uppercase tracking-wider text-ghost mb-1">Rank Alcançado</p>
-                <p className={cn("text-2xl md:text-4xl font-bold", titleColor)}>{rankTitle}</p>
-                {level === 8 && <p className="text-xs text-primary mt-1 animate-pulse">✨ Rank Máximo! ✨</p>}
+              {/* Unique Animated Rank Display */}
+              <div className={cn(
+                "relative overflow-hidden rounded-xl p-5 md:p-6 text-center border border-border/60 shadow-xl flex flex-col items-center gap-2 md:gap-3",
+                `bg-gradient-to-b ${rankUI.glowBg} to-secondary/30`
+              )}>
+                {/* Glowing Icon */}
+                <div className="relative py-1 md:py-2 flex items-center justify-center">
+                  <RankIconComponent className={rankUI.iconClass} />
+                </div>
+
+                {/* Subtitle */}
+                <p className="text-[10px] md:text-xs font-mono uppercase tracking-widest text-ghost">Rank Alcançado</p>
+
+                {/* Title */}
+                <h3 className={rankUI.titleClass}>{rankUI.title}</h3>
               </div>
 
               {/* Stats Grid */}
