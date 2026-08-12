@@ -21,11 +21,10 @@ export function AnswerInput({
   const [value, setValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Keep focus on the input at all times
   useEffect(() => {
-    if (!disabled) {
-      inputRef.current?.focus();
-    }
-  }, [disabled]);
+    inputRef.current?.focus();
+  }, [disabled, feedbackState]);
 
   // Clear input immediately when feedback starts
   useEffect(() => {
@@ -34,17 +33,18 @@ export function AnswerInput({
     }
   }, [feedbackState]);
 
-  // Refocus input when feedback ends (animation complete)
-  useEffect(() => {
-    if (feedbackState === 'idle') {
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [feedbackState]);
+  // Prevent blur on mobile — re-grab focus if lost
+  const handleBlur = () => {
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (disabled || feedbackState !== 'idle') {
+      e.preventDefault();
+      return;
+    }
     if (e.key === 'Enter' && value.trim()) {
       const numValue = parseInt(value, 10);
       if (!isNaN(numValue)) {
@@ -58,7 +58,11 @@ export function AnswerInput({
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (disabled || feedbackState !== 'idle') return;
+    if (disabled || feedbackState !== 'idle') {
+      // Reset value to empty to discard any typed chars during feedback
+      setValue('');
+      return;
+    }
 
     const newValue = e.target.value.replace(/[^\d-]/g, '');
     setValue(newValue);
@@ -84,7 +88,8 @@ export function AnswerInput({
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        disabled={disabled || feedbackState !== 'idle'}
+        onBlur={handleBlur}
+        readOnly={disabled && feedbackState === 'idle'}
         placeholder="?"
         className={cn(
           "w-48 md:w-64 text-center text-4xl md:text-6xl font-medium",
@@ -106,3 +111,4 @@ export function AnswerInput({
     </div>
   );
 }
+
