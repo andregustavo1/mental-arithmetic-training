@@ -273,25 +273,29 @@ export function BossHunterArea({ settings, onUpdateStats, bestRun, bestBosses }:
         </div>
       )}
 
-      {/* Question + Input — only visible during playing and boss_active */}
-      {showQuestionAndInput && (
-        <div className={cn("flex flex-col items-center gap-6 py-4", phase === 'boss_active' && "rounded-xl p-6")}>
-          {displayedQuestion && (
-            <QuestionDisplay question={displayedQuestion} feedbackState={feedbackState} operationClassName="text-destructive" />
-          )}
-          <AnswerInput
-            onSubmit={handleSubmit}
-            feedbackState={feedbackState}
-            onKeyPress={playKeypress}
-            isBossMode
-            disabled={false}
-            targetLength={displayedQuestion ? String(Math.abs(displayedQuestion.answer)).length : undefined}
-          />
+      {/* Question + Input — always in DOM during gameplay to keep mobile keyboard alive */}
+      <div className={cn(
+        "flex flex-col items-center gap-6 py-4",
+        phase === 'boss_active' && "rounded-xl p-6",
+        !showQuestionAndInput && "opacity-0 pointer-events-none h-0 overflow-hidden"
+      )}>
+        {displayedQuestion && (
+          <QuestionDisplay question={displayedQuestion} feedbackState={feedbackState} operationClassName="text-destructive" />
+        )}
+        <AnswerInput
+          onSubmit={handleSubmit}
+          feedbackState={feedbackState}
+          onKeyPress={playKeypress}
+          isBossMode
+          disabled={!showQuestionAndInput}
+          targetLength={displayedQuestion ? String(Math.abs(displayedQuestion.answer)).length : undefined}
+        />
 
-          {/* Horizontal Countdown Bar below input */}
+        {/* Horizontal Countdown Bar below input */}
+        {showQuestionAndInput && (
           <BossTimer timeRemainingMs={bossTimeRemainingMs} totalTimeMs={currentTotalTimeMs} />
-        </div>
-      )}
+        )}
+      </div>
 
       {/* End Button — only during active gameplay */}
       {(phase === 'playing' || phase === 'boss_active') && (
