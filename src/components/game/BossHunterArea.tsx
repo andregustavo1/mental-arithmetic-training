@@ -273,7 +273,8 @@ export function BossHunterArea({ settings, onUpdateStats, bestRun, bestBosses }:
         </div>
       )}
 
-      {/* Question + Input — always in DOM during gameplay to keep mobile keyboard alive */}
+      {/* Question + Input — always in DOM during gameplay to keep mobile keyboard alive, removed on game over */}
+      {phase !== 'game_over' && phase !== 'idle' && (
       <div className={cn(
         "flex flex-col items-center gap-6 py-4",
         phase === 'boss_active' && "rounded-xl p-6",
@@ -296,6 +297,7 @@ export function BossHunterArea({ settings, onUpdateStats, bestRun, bestBosses }:
           <BossTimer timeRemainingMs={bossTimeRemainingMs} totalTimeMs={currentTotalTimeMs} />
         )}
       </div>
+      )}
 
       {/* End Button — only during active gameplay */}
       {(phase === 'playing' || phase === 'boss_active') && (
